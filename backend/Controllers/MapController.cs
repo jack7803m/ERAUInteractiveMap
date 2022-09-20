@@ -8,22 +8,18 @@ using Microsoft.Extensions.Logging;
 namespace backend.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
-    public class WeatherForecastController : ControllerBase
+    [Route("api/[controller]")]
+    public class MapController : ControllerBase
     {
-        private static readonly string[] Summaries = new[]
-        {
-            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-        };
+        private readonly ILogger<MapController> _logger;
 
-        private readonly ILogger<WeatherForecastController> _logger;
-
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
+        public MapController(ILogger<MapController> logger)
         {
             _logger = logger;
         }
 
         [HttpGet]
+        [Route("")]
         public IEnumerable<WeatherForecast> Get()
         {
             var rng = new Random();
@@ -31,7 +27,6 @@ namespace backend.Controllers
             {
                 Date = DateTime.Now.AddDays(index),
                 TemperatureC = rng.Next(-20, 55),
-                Summary = Summaries[rng.Next(Summaries.Length)]
             })
             .ToArray();
         }
