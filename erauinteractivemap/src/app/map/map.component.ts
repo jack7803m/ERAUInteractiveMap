@@ -10,8 +10,8 @@ export class MapComponent implements OnInit {
   constructor() {}
 
   public realBounds: L.LatLngBounds = new L.LatLngBounds([
-    [29.185661557151334, -81.05657440053801],
-    [29.198075957881052, -81.03988631844526],
+    [29.18533793467103, -81.05725010075435],
+    [29.19881398634449, -81.0374078389188],
   ]);
 
   public imageBounds: L.LatLngBounds = new L.LatLngBounds([
