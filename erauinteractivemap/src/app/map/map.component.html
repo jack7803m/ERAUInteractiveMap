@@ -1,1 +1,2 @@
-<div class="main-map" leaflet [leafletOptions]="options"></div>
+<div class="main-map" leaflet [leafletOptions]="options" [leafletFitBounds]="bounds"
+  (leafletMapReady)="onMapReady($event)" (leafletClick)="onMapClick($event)"></div>
