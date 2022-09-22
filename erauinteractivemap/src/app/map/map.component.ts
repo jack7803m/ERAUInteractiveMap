@@ -9,20 +9,18 @@ import * as L from 'leaflet';
 export class MapComponent implements OnInit {
   constructor() {}
 
-  public imageBounds: L.LatLngBounds = new L.LatLngBounds([
+  public realBounds: L.LatLngBounds = new L.LatLngBounds([
     [29.185661557151334, -81.05657440053801],
     [29.198075957881052, -81.03988631844526],
   ]);
 
-  public bounds: L.LatLngBounds = new L.LatLngBounds([
+  public imageBounds: L.LatLngBounds = new L.LatLngBounds([
     [0, 0],
     [1700, 2200],
   ]);
 
   public options: L.MapOptions = {
-    layers: [
-      L.imageOverlay('assets/campus-map.png', this.bounds),
-    ],
+    layers: [L.imageOverlay('assets/campus-map.png', this.imageBounds)],
     zoom: 17,
     zoomSnap: 0,
     crs: L.CRS.Simple,
@@ -30,8 +28,7 @@ export class MapComponent implements OnInit {
     // maxZoom: 2,
   };
 
-  ngOnInit(): void {
-  }
+  ngOnInit(): void {}
 
   onMapReady(map: L.Map) {
     map.on('locationfound', (e) => {
@@ -48,28 +45,26 @@ export class MapComponent implements OnInit {
   }
 
   translateRealToMap(position: L.LatLng): L.LatLng {
-    let mapLeft = 0;
-    let mapBottom = 0;
-    let mapTop = 1700;
-    let mapRight = 2200;
+    // as long as this works, don't touch it :)
+    const mapLeft = this.imageBounds.getWest();
+    const mapBottom = this.imageBounds.getSouth();
+    const mapTop = this.imageBounds.getNorth();
+    const mapRight = this.imageBounds.getEast();
 
-    let realLeft = 29.185661557151334;
-    let realBottom = -81.05657440053801;
-    let realTop = -81.03988631844526;
-    let realRight = 29.198075957881052;
+    const mapWidth = mapRight - mapLeft;
+    const mapHeight = mapTop - mapBottom;
 
-    let realWidth = realRight - realLeft;
-    let realHeight = realTop - realBottom;
+    const realLeft = this.realBounds.getWest();
+    const realBottom = this.realBounds.getSouth();
+    const realTop = this.realBounds.getNorth();
+    const realRight = this.realBounds.getEast();
 
-    let mapWidth = mapRight - mapLeft;
-    let mapHeight = mapTop - mapBottom;
+    const realWidth = realRight - realLeft;
+    const realHeight = realTop - realBottom;
 
-    let x = ((position.lat - realLeft) / realWidth) * mapWidth;
-    let y = ((position.lng - realBottom) / realHeight) * mapHeight;
+    let x = ((position.lng - realLeft) / realWidth) * mapWidth;
+    let y = ((position.lat - realBottom) / realHeight) * mapHeight;
 
-    return new L.LatLng(x, y);
+    return new L.LatLng(y, x);
   }
-
-  // 29.185661557151334, -81.05657440053801
-  // 29.198075957881052, -81.03988631844526
 }
