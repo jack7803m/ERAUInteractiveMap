@@ -33,7 +33,8 @@ export class MapComponent implements OnInit {
   onMapReady(map: L.Map) {
     map.on('locationfound', (e) => {
       L.marker(this.translateRealToMap(e.latlng)).addTo(map);
-      console.log(this.translateRealToMap(e.latlng));
+      L.circle(this.translateRealToMap(e.latlng), e.accuracy).addTo(map);
+      console.log(e.accuracy);
     });
     map.locate();
 
