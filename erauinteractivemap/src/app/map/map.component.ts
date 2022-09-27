@@ -9,12 +9,12 @@ import * as L from 'leaflet';
 export class MapComponent implements OnInit {
   constructor() {}
 
-  public realBounds: L.LatLngBounds = new L.LatLngBounds([
+  public readonly realBounds: L.LatLngBounds = new L.LatLngBounds([
     [29.18533793467103, -81.05725010075435],
     [29.19881398634449, -81.0374078389188],
   ]);
 
-  public imageBounds: L.LatLngBounds = new L.LatLngBounds([
+  public readonly imageBounds: L.LatLngBounds = new L.LatLngBounds([
     [0, 0],
     [1700, 2200],
   ]);
@@ -27,12 +27,17 @@ export class MapComponent implements OnInit {
     zoom: 17,
     zoomSnap: 0,
     crs: L.CRS.Simple,
-    minZoom: -5.85,
-    // maxZoom: 2,
+    minZoom: -0.85,
+    maxZoom: 2,
+    maxBounds: this.imageBounds,
+    maxBoundsViscosity: 0.75,
+
   };
 
   ngOnInit(): void {}
 
+  // do all configuration here that is not done in the template/options
+  // this basically includes 'subscribing' to map events with map.on()
   onMapReady(map: L.Map) {
     map.on('locationfound', (e) => {
       const loc = this.translateRealToMap(e.latlng);
@@ -46,23 +51,27 @@ export class MapComponent implements OnInit {
         }).addTo(map);
       }
     });
-    map.on('locationerror', (e) => {
-      // popup
-
-      alert(e.message);
+    map.on('locationerror', (e: L.ErrorEvent) => {
+      // TODO: better error handling
+      alert(e.message + e.code);
+      map.stopLocate();
+      // if high accuracy is not available, try again with low accuracy
+      map.locate({ enableHighAccuracy: false, watch: true });
     });
-    setInterval(() => {
-      map.locate();
-      console.log('locate called');
-    }, 5000);
 
-    // L.marker([29.186611251392442, -81.05093742884416]).addTo(map);
+    // make a border around the map using a rectangle
+    L.rectangle(this.imageBounds, { color: 'black', weight: 1, fill: false }).addTo(map);
+
+    // high accuracy is ideal here because we want it to be as accurate as possible on the small section of map we have
+    // watch is true because we want to keep updating the location
+    map.locate({ enableHighAccuracy: true, watch: true });
   }
 
   onMapClick(e: L.LeafletMouseEvent) {
     console.log(e);
   }
 
+  // translate a real world lat/lng to a map lat/lng (in pixels from bottom left)
   translateRealToMap(position: L.LatLng): L.LatLng {
     // as long as this works, don't touch it :)
     const mapLeft = this.imageBounds.getWest();
