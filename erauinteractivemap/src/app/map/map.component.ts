@@ -19,6 +19,9 @@ export class MapComponent implements OnInit {
     [1700, 2200],
   ]);
 
+  userLocation?: L.Marker;
+  userLocationRadius?: L.Circle;
+
   public options: L.MapOptions = {
     layers: [L.imageOverlay('assets/campus-map.png', this.imageBounds)],
     zoom: 17,
@@ -32,11 +35,26 @@ export class MapComponent implements OnInit {
 
   onMapReady(map: L.Map) {
     map.on('locationfound', (e) => {
-      L.marker(this.translateRealToMap(e.latlng)).addTo(map);
-      L.circle(this.translateRealToMap(e.latlng), e.accuracy).addTo(map);
-      console.log(e.accuracy);
+      const loc = this.translateRealToMap(e.latlng);
+      if (this.userLocation) {
+        this.userLocation.setLatLng(loc);
+        this.userLocationRadius?.setLatLng(loc);
+      } else {
+        this.userLocation = L.marker(loc).addTo(map);
+        this.userLocationRadius = L.circle(loc, {
+          radius: e.accuracy,
+        }).addTo(map);
+      }
     });
-    map.locate();
+    map.on('locationerror', (e) => {
+      // popup
+
+      alert(e.message);
+    });
+    setInterval(() => {
+      map.locate();
+      console.log('locate called');
+    }, 5000);
 
     // L.marker([29.186611251392442, -81.05093742884416]).addTo(map);
   }
