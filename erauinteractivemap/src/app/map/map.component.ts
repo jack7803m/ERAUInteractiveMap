@@ -55,8 +55,12 @@ export class MapComponent implements OnInit {
       // TODO: better error handling
       alert(e.message + e.code);
       map.stopLocate();
+
       // if high accuracy is not available, try again with low accuracy
-      map.locate({ enableHighAccuracy: false, watch: true });
+      // TODO: determine what the error code is if failed to get high accuracy
+      // if (e.code !== 1) {
+      //   map.locate({ enableHighAccuracy: false, watch: true });
+      //}
     });
 
     // make a border around the map using a rectangle
