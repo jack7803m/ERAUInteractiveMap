@@ -25,7 +25,6 @@ export class MapComponent implements OnInit {
     public options: L.MapOptions = {
         layers: [
             L.imageOverlay('assets/campus-map-base.png', this.imageBounds),
-            L.imageOverlay('assets/campus-map-walkable.png', this.imageBounds),
         ],
         zoom: 17,
         zoomSnap: 0,
