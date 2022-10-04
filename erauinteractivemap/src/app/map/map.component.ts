@@ -2,101 +2,107 @@ import { Component, OnInit } from '@angular/core';
 import * as L from 'leaflet';
 
 @Component({
-  selector: 'app-map',
-  templateUrl: './map.component.html',
-  styleUrls: ['./map.component.scss'],
+    selector: 'app-map',
+    templateUrl: './map.component.html',
+    styleUrls: ['./map.component.scss'],
 })
 export class MapComponent implements OnInit {
-  constructor() {}
+    constructor() {}
 
-  public readonly realBounds: L.LatLngBounds = new L.LatLngBounds([
-    [29.18533793467103, -81.05725010075435],
-    [29.19881398634449, -81.0374078389188],
-  ]);
+    public readonly realBounds: L.LatLngBounds = new L.LatLngBounds([
+        [29.18533793467103, -81.05725010075435],
+        [29.19881398634449, -81.0374078389188],
+    ]);
 
-  public readonly imageBounds: L.LatLngBounds = new L.LatLngBounds([
-    [0, 0],
-    [1700, 2200],
-  ]);
+    public readonly imageBounds: L.LatLngBounds = new L.LatLngBounds([
+        [0, 0],
+        [1700, 2200],
+    ]);
 
-  userLocation?: L.Marker;
-  userLocationRadius?: L.Circle;
+    userLocation?: L.Marker;
+    userLocationRadius?: L.Circle;
 
-  public options: L.MapOptions = {
-    layers: [L.imageOverlay('assets/campus-map.png', this.imageBounds)],
-    zoom: 17,
-    zoomSnap: 0,
-    crs: L.CRS.Simple,
-    minZoom: -0.85,
-    maxZoom: 2,
-    maxBounds: this.imageBounds,
-    maxBoundsViscosity: 0.75,
+    public options: L.MapOptions = {
+        layers: [
+            L.imageOverlay('assets/campus-map-base.png', this.imageBounds),
+            L.imageOverlay('assets/campus-map-walkable.png', this.imageBounds),
+        ],
+        zoom: 17,
+        zoomSnap: 0,
+        crs: L.CRS.Simple,
+        minZoom: -0.85,
+        maxZoom: 2,
+        maxBounds: this.imageBounds,
+        maxBoundsViscosity: 0.75,
+    };
 
-  };
+    ngOnInit(): void {}
 
-  ngOnInit(): void {}
+    // do all configuration here that is not done in the template/options
+    // this basically includes 'subscribing' to map events with map.on()
+    onMapReady(map: L.Map) {
+        map.on('locationfound', (e) => {
+            const loc = this.translateRealToMap(e.latlng);
+            if (this.userLocation) {
+                this.userLocation.setLatLng(loc);
+                this.userLocationRadius?.setLatLng(loc);
+            } else {
+                this.userLocation = L.marker(loc).addTo(map);
+                this.userLocationRadius = L.circle(loc, {
+                    radius: e.accuracy,
+                }).addTo(map);
+            }
+        });
+        map.on('locationerror', (e: L.ErrorEvent) => {
+            // TODO: better error handling
+            alert(e.message + e.code);
+            map.stopLocate();
 
-  // do all configuration here that is not done in the template/options
-  // this basically includes 'subscribing' to map events with map.on()
-  onMapReady(map: L.Map) {
-    map.on('locationfound', (e) => {
-      const loc = this.translateRealToMap(e.latlng);
-      if (this.userLocation) {
-        this.userLocation.setLatLng(loc);
-        this.userLocationRadius?.setLatLng(loc);
-      } else {
-        this.userLocation = L.marker(loc).addTo(map);
-        this.userLocationRadius = L.circle(loc, {
-          radius: e.accuracy,
+            // if high accuracy is not available, try again with low accuracy
+            // TODO: determine what the error code is if failed to get high accuracy
+            // if (e.code !== 1) {
+            //   map.locate({ enableHighAccuracy: false, watch: true });
+            //}
+        });
+
+        // make a border around the map using a rectangle
+        L.rectangle(this.imageBounds, {
+            color: 'black',
+            weight: 1,
+            fill: false,
         }).addTo(map);
-      }
-    });
-    map.on('locationerror', (e: L.ErrorEvent) => {
-      // TODO: better error handling
-      alert(e.message + e.code);
-      map.stopLocate();
 
-      // if high accuracy is not available, try again with low accuracy
-      // TODO: determine what the error code is if failed to get high accuracy
-      // if (e.code !== 1) {
-      //   map.locate({ enableHighAccuracy: false, watch: true });
-      //}
-    });
+        // high accuracy is ideal here because we want it to be as accurate as possible on the small section of map we have
+        // watch is true because we want to keep updating the location
+        map.locate({ enableHighAccuracy: true, watch: true });
+    }
 
-    // make a border around the map using a rectangle
-    L.rectangle(this.imageBounds, { color: 'black', weight: 1, fill: false }).addTo(map);
+    onMapClick(e: L.LeafletMouseEvent) {
+        console.log(e);
+    }
 
-    // high accuracy is ideal here because we want it to be as accurate as possible on the small section of map we have
-    // watch is true because we want to keep updating the location
-    map.locate({ enableHighAccuracy: true, watch: true });
-  }
+    // translate a real world lat/lng to a map lat/lng (in pixels from bottom left)
+    translateRealToMap(position: L.LatLng): L.LatLng {
+        // as long as this works, don't touch it :)
+        const mapLeft = this.imageBounds.getWest();
+        const mapBottom = this.imageBounds.getSouth();
+        const mapTop = this.imageBounds.getNorth();
+        const mapRight = this.imageBounds.getEast();
 
-  onMapClick(e: L.LeafletMouseEvent) {
-    console.log(e);
-  }
+        const mapWidth = mapRight - mapLeft;
+        const mapHeight = mapTop - mapBottom;
 
-  // translate a real world lat/lng to a map lat/lng (in pixels from bottom left)
-  translateRealToMap(position: L.LatLng): L.LatLng {
-    // as long as this works, don't touch it :)
-    const mapLeft = this.imageBounds.getWest();
-    const mapBottom = this.imageBounds.getSouth();
-    const mapTop = this.imageBounds.getNorth();
-    const mapRight = this.imageBounds.getEast();
+        const realLeft = this.realBounds.getWest();
+        const realBottom = this.realBounds.getSouth();
+        const realTop = this.realBounds.getNorth();
+        const realRight = this.realBounds.getEast();
 
-    const mapWidth = mapRight - mapLeft;
-    const mapHeight = mapTop - mapBottom;
+        const realWidth = realRight - realLeft;
+        const realHeight = realTop - realBottom;
 
-    const realLeft = this.realBounds.getWest();
-    const realBottom = this.realBounds.getSouth();
-    const realTop = this.realBounds.getNorth();
-    const realRight = this.realBounds.getEast();
+        let x = ((position.lng - realLeft) / realWidth) * mapWidth;
+        let y = ((position.lat - realBottom) / realHeight) * mapHeight;
 
-    const realWidth = realRight - realLeft;
-    const realHeight = realTop - realBottom;
-
-    let x = ((position.lng - realLeft) / realWidth) * mapWidth;
-    let y = ((position.lat - realBottom) / realHeight) * mapHeight;
-
-    return new L.LatLng(y, x);
-  }
+        return new L.LatLng(y, x);
+    }
 }
