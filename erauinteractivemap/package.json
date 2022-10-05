@@ -19,6 +19,7 @@
     "@angular/platform-browser-dynamic": "^14.0.0",
     "@angular/router": "^14.0.0",
     "@asymmetrik/ngx-leaflet": "^14.0.1",
+    "@auth0/angular-jwt": "^5.1.0",
     "@cloudflare/workers-types": "^3.16.0",
     "leaflet": "^1.8.0",
     "realm-web": "^1.7.1",

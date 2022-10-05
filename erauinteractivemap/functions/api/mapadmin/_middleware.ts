@@ -1,19 +1,13 @@
 // TODO: implement some sort of authentication
 
-import { getDatabaseConnection } from "functions/mongodb";
+import { getDatabaseConnection } from 'functions/mongodb';
 
 export const onRequest = [authentication, database];
 
-export async function authentication(context: any): Promise<Response> {
+async function authentication(context: any): Promise<Response> {
     const { request, env, params, waitUntil, next, data } = context;
 
     const token = request.headers.get('Authorization');
-    // if (!token) {
-    //     return new Response('Unauthorized', {
-    //         status: 401,
-    //         statusText: 'Unauthorized',
-    //     });
-    // }
 
     if (!(await verifyAuthentication(token))) {
         return new Response('Unauthorized', {
@@ -28,7 +22,10 @@ export async function authentication(context: any): Promise<Response> {
 async function database(context: any): Promise<Response> {
     const { request, env, params, waitUntil, next, data } = context;
 
-    const db = await getDatabaseConnection(env.MONGODB_APPID, env.MONGODB_TOKEN);
+    const db = await getDatabaseConnection(
+        env.MONGODB_APPID,
+        env.MONGODB_TOKEN
+    );
 
     if (!db) {
         return new Response('Error getting database connection.', {
@@ -46,14 +43,14 @@ async function verifyAuthentication(token: string): Promise<boolean> {
     if (tokenParts.length !== 2) {
         return false;
     }
-    
+
     const tokenType = tokenParts[0].toLocaleLowerCase();
     const tokenValue = tokenParts[1];
-    
+
     if (tokenType !== 'bearer') {
         return false;
     }
-    
+
     // TODO: implement some sort of session-based authentication
     return true;
 }
