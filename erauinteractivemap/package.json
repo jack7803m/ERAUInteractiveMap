@@ -21,6 +21,7 @@
     "@asymmetrik/ngx-leaflet": "^14.0.1",
     "@cloudflare/workers-types": "^3.16.0",
     "leaflet": "^1.8.0",
+    "realm-web": "^1.7.1",
     "rxjs": "~7.5.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.11.4"

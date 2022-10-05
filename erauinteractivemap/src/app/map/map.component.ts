@@ -10,13 +10,13 @@ export class MapComponent implements OnInit {
     constructor() {}
 
     public readonly realBounds: L.LatLngBounds = new L.LatLngBounds([
-        [29.18533793467103, -81.05725010075435],
-        [29.19881398634449, -81.0374078389188],
+        [29.185670171901748, -81.05683016856118],
+        [29.198278013324593, -81.04355540378286],
     ]);
 
     public readonly imageBounds: L.LatLngBounds = new L.LatLngBounds([
         [0, 0],
-        [1700, 2200],
+        [1700, 1568],
     ]);
 
     userLocation?: L.Marker;
@@ -24,12 +24,16 @@ export class MapComponent implements OnInit {
 
     public options: L.MapOptions = {
         layers: [
-            L.imageOverlay('assets/campus-map-base.png', this.imageBounds),
+            L.imageOverlay('assets/campus-map-trans.png', this.imageBounds),
+            L.imageOverlay(
+                'assets/campus-map-walkable-trans.png',
+                this.imageBounds
+            ),
         ],
         zoom: 17,
         zoomSnap: 0,
         crs: L.CRS.Simple,
-        minZoom: -0.85,
+        minZoom: -0.81,
         maxZoom: 2,
         maxBounds: this.imageBounds,
         maxBoundsViscosity: 0.75,
@@ -48,7 +52,7 @@ export class MapComponent implements OnInit {
             } else {
                 this.userLocation = L.marker(loc).addTo(map);
                 this.userLocationRadius = L.circle(loc, {
-                    radius: e.accuracy,
+                  radius: e.accuracy,
                 }).addTo(map);
             }
         });
@@ -67,7 +71,7 @@ export class MapComponent implements OnInit {
         // make a border around the map using a rectangle
         L.rectangle(this.imageBounds, {
             color: 'black',
-            weight: 1,
+            weight: 3,
             fill: false,
         }).addTo(map);
 
