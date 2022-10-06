@@ -14,6 +14,7 @@ export interface Building {
     entrances: Entrance[];
     restrooms: Restroom[];
     maternity: Maternity[];
+    emergency: Emergency[];
     vending: Vending[];
     children: BuildingChild[];
 }
@@ -34,14 +35,13 @@ export interface Entrance extends BuildingProperty {
     accessibility: boolean;
 }
 
-export interface Restroom extends BuildingProperty {
-}
+export interface Restroom extends BuildingProperty {}
 
-export interface Maternity extends BuildingProperty {
-}
+export interface Maternity extends BuildingProperty {}
 
-export interface Vending extends BuildingProperty {
-}
+export interface Vending extends BuildingProperty {}
+
+export interface Emergency extends BuildingProperty {}
 
 export interface BuildingChild extends BuildingProperty {
     name: string;
