@@ -16,7 +16,10 @@ export async function onRequestPost(context: any) {
 
     const loginRequest = await request.json();
 
-    const user = await db.collection('users').findOne({ username: loginRequest.username });
+    // filter username to prevent injection (not that it really matters in this app)
+    const username = loginRequest.username.replace(/[^a-zA-Z0-9]/g, '');
+
+    const user = await db.collection('users').findOne({ username: username });
 
     if (!user) {
         return new Response('Invalid username or password.', {
@@ -32,7 +35,7 @@ export async function onRequestPost(context: any) {
         });
     }
 
-    const token = await jwt.sign( { username: loginRequest.username, exp: Math.floor(Date.now() / 1000) + (24 * (60 * 60)) }, env.JWT_SECRET );
+    const token = await jwt.sign( { username: username, exp: Math.floor(Date.now() / 1000) + (24 * (60 * 60)) }, env.JWT_SECRET );
 
     return new Response(JSON.stringify({ token: token }), { status: 200, statusText: 'OK' });
 }
