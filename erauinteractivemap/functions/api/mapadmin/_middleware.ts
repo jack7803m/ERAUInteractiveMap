@@ -1,5 +1,4 @@
-// TODO: implement some sort of authentication
-
+import jwt from '@tsndr/cloudflare-worker-jwt';
 import { getDatabaseConnection } from 'functions/mongodb';
 
 export const onRequest = [authentication, database];
@@ -9,7 +8,7 @@ async function authentication(context: any): Promise<Response> {
 
     const token = request.headers.get('Authorization');
 
-    if (!(await verifyAuthentication(token))) {
+    if (!(await verifyAuthentication(token, env.JWT_SECRET))) {
         return new Response('Unauthorized', {
             status: 401,
             statusText: 'Unauthorized',
@@ -38,7 +37,10 @@ async function database(context: any): Promise<Response> {
     return next();
 }
 
-async function verifyAuthentication(token: string): Promise<boolean> {
+async function verifyAuthentication(
+    token: string,
+    secret: string
+): Promise<boolean> {
     const tokenParts = token.split(' ');
     if (tokenParts.length !== 2) {
         return false;
@@ -52,5 +54,5 @@ async function verifyAuthentication(token: string): Promise<boolean> {
     }
 
     // TODO: implement some sort of session-based authentication
-    return true;
+    return await jwt.verify(tokenValue, secret);
 }
