@@ -40,9 +40,16 @@ export async function onRequestPost(context: any) {
 export async function onRequestPut(context: any) {
     const { request, env, params, waitUntil, next, data } = context;
 
-    let pass = request.json().password;
+    try{
 
-    const hash = bcrypt.hashSync(pass, 10);
+        let pass = request.json().password;
 
-    return new Response(JSON.stringify(context), { status: 200, statusText: 'OK' });
+        const hash = bcrypt.hashSync(pass, 10);
+
+        return new Response(JSON.stringify(context), { status: 200, statusText: 'OK' });
+    } catch (ex) {
+
+        return new Response(JSON.stringify(ex) + JSON.stringify(request), { status: 500, statusText: 'Internal Server Error' });
+    }
+
 }
