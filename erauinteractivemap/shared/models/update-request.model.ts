@@ -48,16 +48,16 @@ export class UpdateBuildingRequest {
 
 export class CreateBuildingPropertyRequest {
     buildingId: Realm.BSON.ObjectId;
-    property: BuildingProperty;
+    propertyName: BuildingPropertyName;
     propertyData: BuildingProperty;
 
     public constructor(
         buildingId: Realm.BSON.ObjectId,
-        property: BuildingProperty,
+        property: BuildingPropertyName,
         propertyData: BuildingProperty
     ) {
         this.buildingId = buildingId;
-        this.property = property;
+        this.propertyName = property;
         this.propertyData = propertyData;
     }
 }

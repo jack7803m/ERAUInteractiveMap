@@ -3,8 +3,6 @@ import {
     UpdateBuildingRequest,
 } from 'shared/models/update-request.model';
 
-// TODO: add some sort of basic authentication
-
 export async function onRequestPost(context: any): Promise<Response> {
     const { request, env, params, waitUntil, next, data } = context;
 
@@ -12,10 +10,17 @@ export async function onRequestPost(context: any): Promise<Response> {
 
     const createRequest = (await request.json()) as CreateBuildingRequest;
 
-    // TODO: add to database
+    const resultDocument = await db.collection('buildings').insertOne({
+        name: createRequest.name,
+        description: createRequest.description,
+        location: createRequest.location,
+        category: createRequest.category,
+    });
 
-    // TODO: return _id of new building
-    return new Response('', { status: 204, statusText: 'No Content' });
+    return new Response(JSON.stringify({ id: resultDocument.insertedId }), {
+        status: 200,
+        statusText: 'OK',
+    });
 }
 
 export async function onRequestPut(context: any): Promise<Response> {
@@ -25,7 +30,19 @@ export async function onRequestPut(context: any): Promise<Response> {
 
     const updateRequest = (await request.json()) as UpdateBuildingRequest;
 
-    // TODO: update database
+    await db
+        .collection('buildings')
+        .updateOne(
+            { _id: {$oid: updateRequest.buildingId} },
+            {
+                $set: {
+                    name: updateRequest.name,
+                    description: updateRequest.description,
+                    location: updateRequest.location,
+                    category: updateRequest.category,
+                },
+            }
+        );
 
     return new Response('', { status: 204, statusText: 'No Content' });
 }

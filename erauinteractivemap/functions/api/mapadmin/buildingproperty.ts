@@ -2,8 +2,7 @@ import {
     CreateBuildingPropertyRequest,
     UpdateBuildingPropertyRequest,
 } from 'shared/models/update-request.model';
-
-// TODO: add some sort of basic authentication
+import * as Realm from 'realm-web';
 
 export async function onRequestPost(context: any): Promise<Response> {
     const { request, env, params, waitUntil, next, data } = context;
@@ -13,10 +12,21 @@ export async function onRequestPost(context: any): Promise<Response> {
     const createRequest =
         (await request.json()) as CreateBuildingPropertyRequest;
 
-    // TODO: add to database
+    let propertyData = createRequest.propertyData;
+    propertyData._id = new Realm.BSON.ObjectId();
 
-    // TODO: return _id of new buildingProperty
-    return new Response('', { status: 204, statusText: 'No Content' });
+    // EXAMPLE:: $push { entrances: propertydata }
+    let update: { $push: any } = { $push: {} };
+    update.$push[`${createRequest.propertyName}`] = propertyData;
+
+    await db
+        .collection('buildings')
+        .updateOne({ _id: { $oid: createRequest.buildingId } }, update);
+
+    return new Response(JSON.stringify({ id: propertyData._id }), {
+        status: 200,
+        statusText: 'OK',
+    });
 }
 
 export async function onRequestPut(context: any): Promise<Response> {

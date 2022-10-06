@@ -5,7 +5,7 @@ export interface DatabaseSchema {
     pins: Pin[];
 }
 
-export interface Building {
+export interface Building extends globalThis.Realm.Services.MongoDB.Document {
     _id: Realm.BSON.ObjectId;
     name: string;
     description: string;
@@ -47,7 +47,7 @@ export interface BuildingChild extends BuildingProperty {
     name: string;
 }
 
-export interface Pin {
+export interface Pin extends globalThis.Realm.Services.MongoDB.Document {
     _id: Realm.BSON.ObjectId;
     category: string;
     color: string;

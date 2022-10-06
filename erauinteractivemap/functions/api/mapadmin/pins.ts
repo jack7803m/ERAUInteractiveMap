@@ -3,8 +3,6 @@ import {
     UpdatePinCategoryRequest,
 } from 'shared/models/update-request.model';
 
-// TODO: add some sort of basic authentication
-
 export async function onRequestPost(context: any): Promise<Response> {
     const { request, env, params, waitUntil, next, data } = context;
 
@@ -12,10 +10,16 @@ export async function onRequestPost(context: any): Promise<Response> {
 
     const createPinRequest = (await request.json()) as CreatePinCategoryRequest;
 
-    // TODO: add to database
+    const resultDocument = await db.collection('pins').insertOne({
+        category: createPinRequest.category,
+        color: createPinRequest.color,
+        icon: createPinRequest.icon,
+    });
 
-    // TODO: return _id of new pin category
-    return new Response('', { status: 204, statusText: 'No Content' });
+    return new Response(JSON.stringify({ id: resultDocument.insertedId }), {
+        status: 200,
+        statusText: 'OK',
+    });
 }
 
 export async function onRequestPut(context: any): Promise<Response> {
@@ -25,18 +29,30 @@ export async function onRequestPut(context: any): Promise<Response> {
 
     const updatePinRequest = (await request.json()) as UpdatePinCategoryRequest;
 
-    // TODO: update database
+    await db.collection('pins').updateOne(
+        {
+            _id: { $oid: updatePinRequest.id },
+        },
+        {
+            $set: {
+                category: updatePinRequest.category,
+                color: updatePinRequest.color,
+                icon: updatePinRequest.icon,
+            },
+        }
+    );
 
     return new Response('', { status: 204, statusText: 'No Content' });
 }
 
-// returns 400 bad request if request body is not a valid UpdateRequest
 export async function onRequestDelete(context: any): Promise<Response> {
     const { request, env, params, waitUntil, next, data } = context;
 
     const db: globalThis.Realm.Services.MongoDBDatabase = data.db;
 
-    // TODO: implement delete
+    const id = (await request.json()).id;
+
+    await db.collection('pins').deleteOne({ _id: id });
 
     return new Response('', { status: 204, statusText: 'No Content' });
 }
