@@ -25,7 +25,7 @@ export async function onRequestPost(context: any) {
         });
     }
 
-    if (await bcrypt.compare(loginRequest.password, user.password)) {
+    if (!(await bcrypt.compare(loginRequest.password, user.password))) {
         return new Response('Invalid username or password.', {
             status: 401,
             statusText: 'Unauthorized',
