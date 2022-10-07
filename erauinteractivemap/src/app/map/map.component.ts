@@ -36,7 +36,7 @@ export class MapComponent implements OnInit {
         minZoom: -0.81,
         maxZoom: 2,
         maxBounds: this.imageBounds,
-        maxBoundsViscosity: 0.75,
+        maxBoundsViscosity: 0.95,
     };
 
     ngOnInit(): void {}
