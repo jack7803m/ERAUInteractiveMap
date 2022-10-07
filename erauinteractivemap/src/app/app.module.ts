@@ -14,13 +14,14 @@ import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
+import { AdminEditComponent } from './admin/admin-edit/admin-edit.component';
 
 export function tokenGetter() {
     return localStorage.getItem('access_token');
 }
 
 @NgModule({
-    declarations: [AppComponent, MapComponent, AdminLoginComponent],
+    declarations: [AppComponent, MapComponent, AdminLoginComponent, AdminEditComponent],
     imports: [
         BrowserModule,
         AppRoutingModule,
