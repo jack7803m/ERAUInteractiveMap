@@ -53,6 +53,5 @@ async function verifyAuthentication(
         return false;
     }
 
-    // TODO: implement some sort of session-based authentication
     return await jwt.verify(tokenValue, secret);
 }

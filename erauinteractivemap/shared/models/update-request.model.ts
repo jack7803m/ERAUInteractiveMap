@@ -1,9 +1,6 @@
 import * as Realm from 'realm-web';
 import { BuildingPropertyName } from 'shared/enums/database-schema.enum';
-import {
-    BuildingProperty,
-    PointLocation,
-} from './database-schema.model';
+import { BuildingProperty, PointLocation } from './database-schema.model';
 
 export class CreateBuildingRequest {
     name: string;
@@ -78,6 +75,22 @@ export class UpdateBuildingPropertyRequest {
         this.propertyName = propertyName;
         this.propertyId = propertyId;
         this.propertyData = propertyData;
+    }
+}
+
+export class DeleteBuildingPropertyRequest {
+    buildingId: Realm.BSON.ObjectId;
+    propertyName: BuildingPropertyName;
+    propertyId: Realm.BSON.ObjectId;
+
+    public constructor(
+        buildingId: Realm.BSON.ObjectId,
+        propertyName: BuildingPropertyName,
+        propertyId: Realm.BSON.ObjectId
+    ) {
+        this.buildingId = buildingId;
+        this.propertyName = propertyName;
+        this.propertyId = propertyId;
     }
 }
 

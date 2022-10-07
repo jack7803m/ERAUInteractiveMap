@@ -1,5 +1,6 @@
 import {
     CreateBuildingPropertyRequest,
+    DeleteBuildingPropertyRequest,
     UpdateBuildingPropertyRequest,
 } from 'shared/models/update-request.model';
 import * as Realm from 'realm-web';
@@ -37,7 +38,19 @@ export async function onRequestPut(context: any): Promise<Response> {
     const updateRequest =
         (await request.json()) as UpdateBuildingPropertyRequest;
 
-    // TODO: update database
+    let propertyData = updateRequest.propertyData;
+
+    // EXAMPLE:: $set { entrances.$[elem].name: propertydata.name }
+    let update: { $set: any } = { $set: {} };
+    update.$set[`${updateRequest.propertyName}.$[elem]`] = propertyData;
+
+    await db
+        .collection('buildings')
+        .updateOne(
+            { _id: { $oid: updateRequest.buildingId } },
+            update,
+            { arrayFilters: [{ 'elem._id': { $oid: updateRequest.propertyId } }] }
+    );
 
     return new Response('', { status: 204, statusText: 'No Content' });
 }
@@ -48,7 +61,15 @@ export async function onRequestDelete(context: any): Promise<Response> {
 
     const db: globalThis.Realm.Services.MongoDBDatabase = data.db;
 
-    // TODO: implement deletion
+    const deleteRequest = (await request.json()) as DeleteBuildingPropertyRequest;
 
+    // EXAMPLE:: $pull { entrances: { _id: propertyId } }
+    let update: { $pull: any } = { $pull: {} };
+    update.$pull[`${deleteRequest.propertyName}`] = { _id: deleteRequest.propertyId };
+
+    await db
+        .collection('buildings')
+        .updateOne({ _id: { $oid: deleteRequest.buildingId } }, update);
+    
     return new Response('', { status: 204, statusText: 'No Content' });
 }

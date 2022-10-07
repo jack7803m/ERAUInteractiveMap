@@ -1,5 +1,4 @@
 import { getDatabaseConnection } from 'functions/mongodb';
-import * as Realm from 'realm-web';
 
 export async function onRequestGet(context: any): Promise<Response> {
     const { request, env, params, waitUntil, next, data } = context;
@@ -13,7 +12,13 @@ export async function onRequestGet(context: any): Promise<Response> {
         });
     }
 
-    let allData = await db.collection('buildings').find();
+    let allBuildings = await db.collection('buildings').find();
+    let allPins = await db.collection('pins').find();
+
+    let allData = {
+        buildings: allBuildings,
+        pins: allPins,
+    };
 
     return new Response(JSON.stringify(allData), {
         status: 200,
