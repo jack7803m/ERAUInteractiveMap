@@ -19,6 +19,13 @@ export class MapComponent implements OnInit {
     [1700, 2200],
   ]);
 
+  goldMarker = L.icon({
+    iconUrl: 'assets/gold.png',
+    iconSize: [20,20],
+    iconAnchor: [150, 300],
+
+  });
+
   userLocation?: L.Marker;
   userLocationRadius?: L.Circle;
 
@@ -39,6 +46,7 @@ export class MapComponent implements OnInit {
   // do all configuration here that is not done in the template/options
   // this basically includes 'subscribing' to map events with map.on()
   onMapReady(map: L.Map) {
+    L.marker([29.1853379346714, -81.05725010075431] ,{icon: this.goldMarker, draggable: true}).addTo(map);
     map.on('locationfound', (e) => {
       const loc = this.translateRealToMap(e.latlng);
       if (this.userLocation) {
@@ -56,11 +64,6 @@ export class MapComponent implements OnInit {
       alert(e.message + e.code);
       map.stopLocate();
 
-      // if high accuracy is not available, try again with low accuracy
-      // TODO: determine what the error code is if failed to get high accuracy
-      // if (e.code !== 1) {
-      //   map.locate({ enableHighAccuracy: false, watch: true });
-      //}
     });
 
     // make a border around the map using a rectangle
@@ -99,4 +102,5 @@ export class MapComponent implements OnInit {
 
     return new L.LatLng(y, x);
   }
+
 }
