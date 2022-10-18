@@ -26,7 +26,7 @@ const routes: Routes = [
     },
     {
         path: '**',
-        component: MapComponent,
+        redirectTo: '',
     },
 ];
 
@@ -34,4 +34,4 @@ const routes: Routes = [
     imports: [RouterModule.forRoot(routes)],
     exports: [RouterModule],
 })
-export class AppRoutingModule { }
+export class AppRoutingModule {}

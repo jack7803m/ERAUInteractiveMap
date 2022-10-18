@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import * as L from 'leaflet';
+import { MapDataService } from 'src/app/_services/map-data.service';
 
 @Component({
     selector: 'app-admin-map',
@@ -7,7 +8,7 @@ import * as L from 'leaflet';
     styleUrls: ['./admin-map.component.scss'],
 })
 export class AdminMapComponent implements OnInit {
-    constructor() {}
+    constructor(private mapDataService: MapDataService) {}
 
     public readonly realBounds: L.LatLngBounds = new L.LatLngBounds([
         [29.185670171901748, -81.05683016856118],
@@ -18,6 +19,8 @@ export class AdminMapComponent implements OnInit {
         [0, 0],
         [1700, 1568],
     ]);
+
+    private map?: L.Map;
 
     userLocation?: L.Marker;
     userLocationRadius?: L.Circle;
@@ -44,6 +47,8 @@ export class AdminMapComponent implements OnInit {
     // do all configuration here that is not done in the template/options
     // this basically includes 'subscribing' to map events with map.on()
     onMapReady(map: L.Map) {
+        this.map = map;
+
         map.on('locationfound', (e) => {
             const loc = this.translateRealToMap(e.latlng);
             if (this.userLocation) {
@@ -52,7 +57,7 @@ export class AdminMapComponent implements OnInit {
             } else {
                 this.userLocation = L.marker(loc).addTo(map);
                 this.userLocationRadius = L.circle(loc, {
-                  radius: e.accuracy,
+                    radius: e.accuracy,
                 }).addTo(map);
             }
         });
@@ -60,12 +65,6 @@ export class AdminMapComponent implements OnInit {
             // TODO: better error handling
             alert(e.message + e.code);
             map.stopLocate();
-
-            // if high accuracy is not available, try again with low accuracy
-            // TODO: determine what the error code is if failed to get high accuracy
-            // if (e.code !== 1) {
-            //   map.locate({ enableHighAccuracy: false, watch: true });
-            //}
         });
 
         // make a border around the map using a rectangle
@@ -74,15 +73,19 @@ export class AdminMapComponent implements OnInit {
             weight: 3,
             fill: false,
         }).addTo(map);
-
-        // high accuracy is ideal here because we want it to be as accurate as possible on the small section of map we have
-        // watch is true because we want to keep updating the location
-        map.locate({ enableHighAccuracy: true, watch: true });
     }
 
     onMapClick(e: L.LeafletMouseEvent) {
         console.log(e);
     }
+
+    addMarkerToMap() {
+        if (this.map) {
+            L.marker(this.map.getCenter(), { draggable: true, autoPan: true }).addTo(this.map);
+        }
+    }
+
+    applyChanges() {}
 
     // translate a real world lat/lng to a map lat/lng (in pixels from bottom left)
     translateRealToMap(position: L.LatLng): L.LatLng {

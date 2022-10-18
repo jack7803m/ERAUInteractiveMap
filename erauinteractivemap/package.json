@@ -25,6 +25,7 @@
     "@cloudflare/workers-types": "^3.16.0",
     "bcryptjs": "^2.4.3",
     "leaflet": "^1.8.0",
+    "ngx-toastr": "^15.2.1",
     "realm-web": "^1.7.1",
     "rxjs": "~7.5.0",
     "tslib": "^2.3.0",

@@ -16,6 +16,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { AdminEditComponent } from './admin/admin-edit/admin-edit.component';
 import { AdminMapComponent } from './admin/admin-map/admin-map.component';
+import { ToastrModule } from 'ngx-toastr';
 
 export function tokenGetter() {
     return localStorage.getItem('access_token');
@@ -38,6 +39,7 @@ export function tokenGetter() {
             },
         }),
         BrowserAnimationsModule,
+        ToastrModule.forRoot(),
         MatCardModule,
         FormsModule,
         MatFormFieldModule,

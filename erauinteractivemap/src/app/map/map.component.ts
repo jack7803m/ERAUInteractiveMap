@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import * as L from 'leaflet';
+import { ToastrService } from 'ngx-toastr';
+import { MapDataService } from '../_services/map-data.service';
 
 @Component({
     selector: 'app-map',
@@ -7,7 +9,7 @@ import * as L from 'leaflet';
     styleUrls: ['./map.component.scss'],
 })
 export class MapComponent implements OnInit {
-    constructor() {}
+    constructor(private toastr: ToastrService, private mapDataService: MapDataService) {}
 
     public readonly realBounds: L.LatLngBounds = new L.LatLngBounds([
         [29.185670171901748, -81.05683016856118],
@@ -62,8 +64,7 @@ export class MapComponent implements OnInit {
             }
         });
         map.on('locationerror', (e: L.ErrorEvent) => {
-            // TODO: better error handling?
-            alert('Please enable location services to use this feature.');
+            this.toastr.error("Please enable location services to use this feature.", "Location Error");
             map.stopLocate();
         });
 
