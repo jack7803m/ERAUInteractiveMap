@@ -19,6 +19,8 @@ export class MapComponent implements OnInit {
         [1700, 1568],
     ]);
 
+    private map?: L.Map;
+
     userLocation?: L.Marker;
     userLocationRadius?: L.Circle;
 
@@ -37,6 +39,8 @@ export class MapComponent implements OnInit {
         maxZoom: 2,
         maxBounds: this.imageBounds,
         maxBoundsViscosity: 0.95,
+        attributionControl: false,
+        zoomControl: false,
     };
 
     ngOnInit(): void {}
@@ -44,6 +48,7 @@ export class MapComponent implements OnInit {
     // do all configuration here that is not done in the template/options
     // this basically includes 'subscribing' to map events with map.on()
     onMapReady(map: L.Map) {
+        this.map = map;
         map.on('locationfound', (e) => {
             const loc = this.translateRealToMap(e.latlng);
             if (this.userLocation) {
@@ -52,20 +57,14 @@ export class MapComponent implements OnInit {
             } else {
                 this.userLocation = L.marker(loc).addTo(map);
                 this.userLocationRadius = L.circle(loc, {
-                  radius: e.accuracy,
+                    radius: e.accuracy,
                 }).addTo(map);
             }
         });
         map.on('locationerror', (e: L.ErrorEvent) => {
-            // TODO: better error handling
-            alert(e.message + e.code);
+            // TODO: better error handling?
+            alert('Please enable location services to use this feature.');
             map.stopLocate();
-
-            // if high accuracy is not available, try again with low accuracy
-            // TODO: determine what the error code is if failed to get high accuracy
-            // if (e.code !== 1) {
-            //   map.locate({ enableHighAccuracy: false, watch: true });
-            //}
         });
 
         // make a border around the map using a rectangle
@@ -74,18 +73,26 @@ export class MapComponent implements OnInit {
             weight: 3,
             fill: false,
         }).addTo(map);
-
-        // high accuracy is ideal here because we want it to be as accurate as possible on the small section of map we have
-        // watch is true because we want to keep updating the location
-        map.locate({ enableHighAccuracy: true, watch: true });
     }
 
-    onMapClick(e: L.LeafletMouseEvent) {
-        console.log(e);
+    onMapLocate() {
+        if (!this.userLocation) {
+            // high accuracy is ideal here because we want it to be as accurate as possible on the small section of map we have
+            // watch is true because we want to keep updating the location
+            this.map?.locate({ enableHighAccuracy: true, watch: true });
+        }
+    }
+
+    onZoomIn() {
+        this.map?.zoomIn();
+    }
+
+    onZoomOut() {
+        this.map?.zoomOut();
     }
 
     // translate a real world lat/lng to a map lat/lng (in pixels from bottom left)
-    translateRealToMap(position: L.LatLng): L.LatLng {
+    private translateRealToMap(position: L.LatLng): L.LatLng {
         // as long as this works, don't touch it :)
         const mapLeft = this.imageBounds.getWest();
         const mapBottom = this.imageBounds.getSouth();
