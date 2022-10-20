@@ -8,24 +8,10 @@ import { DatabaseSchema } from '../../../shared/models/database-schema.model';
     providedIn: 'root',
 })
 export class MapDataService {
-    public mapData: Subject<DatabaseSchema> =
-        new Subject<DatabaseSchema>();
 
     constructor(private http: HttpClient, private toastr: ToastrService) {}
 
     getMapData(): Observable<DatabaseSchema> {
-        let request = this.http.get<DatabaseSchema>('/api/mapdb');
-
-        request.subscribe({
-            next: (data) => {
-                this.mapData.next(data);
-                this.mapData.complete();
-            },
-            error: (err) => {
-                this.toastr.error(err)
-            },
-        });
-
-        return request;
+        return this.http.get<DatabaseSchema>('/api/mapdb');
     }
 }

@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import * as L from 'leaflet';
+import { DatabaseSchema } from 'shared/models/database-schema.model';
+import { AdminService } from 'src/app/_services/admin.service';
 import { MapDataService } from 'src/app/_services/map-data.service';
 
 @Component({
@@ -8,7 +10,7 @@ import { MapDataService } from 'src/app/_services/map-data.service';
     styleUrls: ['./admin-map.component.scss'],
 })
 export class AdminMapComponent implements OnInit {
-    constructor(private mapDataService: MapDataService) {}
+    constructor(private mapDataService: MapDataService, private adminService: AdminService) {}
 
     public readonly realBounds: L.LatLngBounds = new L.LatLngBounds([
         [29.185670171901748, -81.05683016856118],
@@ -21,6 +23,8 @@ export class AdminMapComponent implements OnInit {
     ]);
 
     private map?: L.Map;
+    private mapData?: DatabaseSchema;
+    private newData?: DatabaseSchema;
 
     userLocation?: L.Marker;
     userLocationRadius?: L.Circle;
@@ -42,7 +46,12 @@ export class AdminMapComponent implements OnInit {
         maxBoundsViscosity: 0.95,
     };
 
-    ngOnInit(): void {}
+    ngOnInit(): void {
+        this.mapDataService.getMapData().subscribe((data) => {
+            this.mapData = data;
+            this.newData = data;
+        });
+    }
 
     // do all configuration here that is not done in the template/options
     // this basically includes 'subscribing' to map events with map.on()
@@ -85,7 +94,11 @@ export class AdminMapComponent implements OnInit {
         }
     }
 
-    applyChanges() {}
+    applyChanges() {
+        if (this.mapData) {
+            this.adminService.applyChanges(this.mapData, this.newData ?? this.mapData);
+        }
+    }
 
     // translate a real world lat/lng to a map lat/lng (in pixels from bottom left)
     translateRealToMap(position: L.LatLng): L.LatLng {
