@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { MatButton } from '@angular/material/button';
 import * as L from 'leaflet';
+import { ConnectableObservable } from 'rxjs';
 
 @Component({
     selector: 'app-map',
@@ -7,11 +9,17 @@ import * as L from 'leaflet';
     styleUrls: ['./map.component.scss'],
 })
 export class MapComponent implements OnInit {
-    constructor() {}
+    toggleS: boolean = false;
+    toggleW: boolean = true;
+    constructor() {
+    }
+
+    // the bounds of the map in real world coordinates
+    private map?: L.Map;
 
     public readonly realBounds: L.LatLngBounds = new L.LatLngBounds([
-        [29.185670171901748, -81.05683016856118],
-        [29.198278013324593, -81.04355540378286],
+        [29.185670171901730, -81.05683016856100],
+        [29.198278013324596, -81.0435554037837],
     ]);
 
     public readonly imageBounds: L.LatLngBounds = new L.LatLngBounds([
@@ -21,29 +29,28 @@ export class MapComponent implements OnInit {
 
     userLocation?: L.Marker;
     userLocationRadius?: L.Circle;
+    mapPng: L.Layer = L.imageOverlay('assets/images/vectorymappyNowalk.svg', this.realBounds);
+    walkPng: L.Layer = L.imageOverlay('assets/images/walky.svg', this.realBounds);
+    satelite: L.Layer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}');
+
 
     public options: L.MapOptions = {
         layers: [
-            L.imageOverlay('assets/campus-map-trans.png', this.imageBounds),
-            L.imageOverlay(
-                'assets/campus-map-walkable-trans.png',
-                this.imageBounds
-            ),
+            this.mapPng,
+            this.walkPng,
         ],
         zoom: 17,
         zoomSnap: 0,
-        crs: L.CRS.Simple,
-        minZoom: -0.81,
-        maxZoom: 2,
-        maxBounds: this.imageBounds,
-        maxBoundsViscosity: 0.95,
     };
 
-    ngOnInit(): void {}
+
+
+    ngOnInit(): void { }
 
     // do all configuration here that is not done in the template/options
     // this basically includes 'subscribing' to map events with map.on()
     onMapReady(map: L.Map) {
+        this.map = map;
         map.on('locationfound', (e) => {
             const loc = this.translateRealToMap(e.latlng);
             if (this.userLocation) {
@@ -52,7 +59,7 @@ export class MapComponent implements OnInit {
             } else {
                 this.userLocation = L.marker(loc).addTo(map);
                 this.userLocationRadius = L.circle(loc, {
-                  radius: e.accuracy,
+                    radius: e.accuracy,
                 }).addTo(map);
             }
         });
@@ -78,13 +85,38 @@ export class MapComponent implements OnInit {
         // high accuracy is ideal here because we want it to be as accurate as possible on the small section of map we have
         // watch is true because we want to keep updating the location
         map.locate({ enableHighAccuracy: true, watch: true });
+        map.fitBounds(this.realBounds);
+
     }
+
 
     onMapClick(e: L.LeafletMouseEvent) {
-        console.log(e);
+        console.log(e.latlng);
     }
 
-    // translate a real world lat/lng to a map lat/lng (in pixels from bottom left)
+    toggleSatelite() {
+        this.toggleS = !this.toggleS;
+        if (this.toggleS) {
+            this.map?.addLayer(this.satelite);
+            console.warn("Statlite is on");
+        } else {
+            this.map?.removeLayer(this.satelite);
+            console.warn("Statlite is off");
+        }
+    }
+
+    toggleWalk() {
+        this.toggleW = !this.toggleW;
+        if (this.toggleW) {
+            this.map?.addLayer(this.walkPng);
+            console.warn("Walk is on");
+        } else {
+            this.map?.removeLayer(this.walkPng);
+            console.warn("Walk is off");
+        }
+    }
+
+
     translateRealToMap(position: L.LatLng): L.LatLng {
         // as long as this works, don't touch it :)
         const mapLeft = this.imageBounds.getWest();

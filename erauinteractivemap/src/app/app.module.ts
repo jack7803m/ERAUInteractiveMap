@@ -40,6 +40,7 @@ export function tokenGetter() {
         BrowserAnimationsModule,
         MatCardModule,
         FormsModule,
+        MatButtonModule,
         MatFormFieldModule,
         MatButtonModule,
         MatInputModule,
@@ -47,4 +48,4 @@ export function tokenGetter() {
     providers: [],
     bootstrap: [AppComponent],
 })
-export class AppModule {}
+export class AppModule { }

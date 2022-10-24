@@ -1,2 +1,7 @@
 <div class="main-map" leaflet [leafletOptions]="options" [leafletFitBounds]="imageBounds"
-  (leafletMapReady)="onMapReady($event)" (leafletClick)="onMapClick($event)"></div>
+  (leafletMapReady)="onMapReady($event)" (leafletClick)="onMapClick($event)" >
+</div>
+<div>
+    <button (click)="toggleSatelite()" class="button">Satelite</button>
+    <button (click)="toggleWalk()" class="button2">Paths</button>
+</div>

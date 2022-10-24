@@ -7,3 +7,24 @@
     z-index: 0;
     background: white;
 }
+.button{
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: white;
+    border: 1px solid black;
+    border-radius: 5px;
+    padding: 5px;
+    margin: 5px;
+}
+
+.button2 {
+    position: absolute;
+    top: 5%;
+    right: 0;
+    background: white;
+    border: 1px solid black;
+    border-radius: 5px;
+    padding: 5px;
+    margin: 5px;
+}
