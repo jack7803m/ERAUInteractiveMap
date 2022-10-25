@@ -1,7 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { MatButton } from '@angular/material/button';
 import * as L from 'leaflet';
-import { ConnectableObservable } from 'rxjs';
 
 @Component({
     selector: 'app-map',
@@ -11,6 +9,7 @@ import { ConnectableObservable } from 'rxjs';
 export class MapComponent implements OnInit {
     toggleS: boolean = false;
     toggleW: boolean = true;
+    toggleM: boolean = true;
     constructor() {
     }
 
@@ -32,6 +31,8 @@ export class MapComponent implements OnInit {
     mapPng: L.Layer = L.imageOverlay('assets/images/vectorymappyNowalk.svg', this.realBounds);
     walkPng: L.Layer = L.imageOverlay('assets/images/walky.svg', this.realBounds);
     satelite: L.Layer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}');
+
+
 
 
     public options: L.MapOptions = {
@@ -116,6 +117,16 @@ export class MapComponent implements OnInit {
         }
     }
 
+    toggleMap() {
+        this.toggleM = !this.toggleM;
+        if (this.toggleM) {
+            this.map?.addLayer(this.mapPng);
+            console.warn("Map is on");
+        } else {
+            this.map?.removeLayer(this.mapPng);
+            console.warn("Map is off");
+        }
+    }
 
     translateRealToMap(position: L.LatLng): L.LatLng {
         // as long as this works, don't touch it :)
