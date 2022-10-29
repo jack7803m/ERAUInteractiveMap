@@ -7,3 +7,9 @@
     <button (click)="toggleWalk()" class="button-2">Paths</button>
     <button (click)="toggleMap()" class="button-3">Map Overlay</button>
 </div>
+
+<div class="search">
+    <mat-form-field>
+        <input matInput type="search" placeholder="Campus Search" [(ngModel)]="searchText" (keyup.enter)="search()">
+    </mat-form-field>
+</div>

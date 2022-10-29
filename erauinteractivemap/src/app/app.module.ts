@@ -17,6 +17,7 @@ import { MatInputModule } from '@angular/material/input';
 import { AdminEditComponent } from './admin/admin-edit/admin-edit.component';
 import { AdminMapComponent } from './admin/admin-map/admin-map.component';
 
+
 export function tokenGetter() {
     return localStorage.getItem('access_token');
 }
@@ -44,6 +45,7 @@ export function tokenGetter() {
         MatFormFieldModule,
         MatButtonModule,
         MatInputModule,
+        MatFormFieldModule
     ],
     providers: [],
     bootstrap: [AppComponent],

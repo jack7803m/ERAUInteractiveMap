@@ -10,6 +10,7 @@ export class MapComponent implements OnInit {
     toggleS: boolean = false;
     toggleW: boolean = true;
     toggleM: boolean = true;
+    searchText: string = '';
     constructor() {
     }
 
@@ -150,5 +151,9 @@ export class MapComponent implements OnInit {
         let y = ((position.lat - realBottom) / realHeight) * mapHeight;
 
         return new L.LatLng(y, x);
+    }
+
+    search() {
+        console.log(this.searchText)
     }
 }
