@@ -1,6 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import * as L from 'leaflet';
+import { ToastrService } from 'ngx-toastr';
 import { DatabaseSchema } from 'shared/models/database-schema.model';
+import { ICanDeactivate } from 'src/app/_interfaces/ICanDeactivate.interface';
 import { AdminService } from 'src/app/_services/admin.service';
 import { MapDataService } from 'src/app/_services/map-data.service';
 
@@ -9,8 +11,8 @@ import { MapDataService } from 'src/app/_services/map-data.service';
     templateUrl: './admin-map.component.html',
     styleUrls: ['./admin-map.component.scss'],
 })
-export class AdminMapComponent implements OnInit {
-    constructor(private mapDataService: MapDataService, private adminService: AdminService) {}
+export class AdminMapComponent implements OnInit, ICanDeactivate {
+    constructor(private mapDataService: MapDataService, private adminService: AdminService, private toastr: ToastrService) { }
 
     public readonly realBounds: L.LatLngBounds = new L.LatLngBounds([
         [29.185670171901748, -81.05683016856118],
@@ -23,8 +25,9 @@ export class AdminMapComponent implements OnInit {
     ]);
 
     private map?: L.Map;
-    private mapData?: DatabaseSchema;
+    private oldData?: DatabaseSchema;
     private newData?: DatabaseSchema;
+    private changes: boolean = false;
 
     userLocation?: L.Marker;
     userLocationRadius?: L.Circle;
@@ -44,13 +47,37 @@ export class AdminMapComponent implements OnInit {
         maxZoom: 2,
         maxBounds: this.imageBounds,
         maxBoundsViscosity: 0.95,
+        attributionControl: false,
+        zoomControl: false,
     };
 
     ngOnInit(): void {
         this.mapDataService.getMapData().subscribe((data) => {
-            this.mapData = data;
+            this.oldData = data;
             this.newData = data;
         });
+
+        setInterval(() => {
+            this.mapDataService.getMapData().subscribe((data) => {
+                // cheap trick but easier than comparing every field
+                if (JSON.stringify(data) !== JSON.stringify(this.oldData)) {
+                    this.toastr.warning("Map data has changed. Please refresh to see changes.");
+                }
+            })
+        }, 120_000);
+    }
+
+    @HostListener('window:beforeunload', ['$event'])
+    unloadHandler(event: BeforeUnloadEvent) {
+        return this.canDeactivate();
+    }
+
+    canDeactivate(): boolean {
+        if (this.changes) {
+            return confirm("You have unsaved changes. Are you sure you want to leave?");
+        }
+
+        return true;
     }
 
     // do all configuration here that is not done in the template/options
@@ -95,8 +122,8 @@ export class AdminMapComponent implements OnInit {
     }
 
     applyChanges() {
-        if (this.mapData) {
-            this.adminService.applyChanges(this.mapData, this.newData ?? this.mapData);
+        if (this.oldData) {
+            this.adminService.applyChanges(this.oldData, this.newData ?? this.oldData);
         }
     }
 

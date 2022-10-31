@@ -1,12 +1,32 @@
-<div class="main-map" leaflet [leafletOptions]="options" [leafletFitBounds]="imageBounds"
-    (leafletMapReady)="onMapReady($event)" (leafletClick)="addMarkerToMap()"></div>
+<div
+    class="main-map"
+    leaflet
+    [leafletOptions]="options"
+    [leafletFitBounds]="imageBounds"
+    (leafletMapReady)="onMapReady($event)"
+></div>
 
 <!-- UI on top of map -->
 <div class="absolute top-0 left-0 z-50 w-full h-full pointer-events-none">
     <div class="flex flex-col justify-between h-full">
         <div class="flex flex-row justify-between">
             <div>
-                <!-- upper left -->
+                <button (click)="addMarkerToMap()" class="pointer-events-auto bg-white border drop-shadow-lg rounded-md p-2 m-2 border-black hover:bg-gray-200">
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="1.5"
+                        stroke="currentColor"
+                        class="w-12 h-12"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                    </svg>
+                </button>
             </div>
             <div>
                 <!-- upper right -->

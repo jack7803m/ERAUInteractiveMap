@@ -1,7 +1,6 @@
 import {
     CreateBuildingPropertyRequest,
     DeleteBuildingPropertyRequest,
-    UpdateBuildingPropertyRequest,
 } from 'shared/models/update-request.model';
 import * as Realm from 'realm-web';
 
@@ -30,31 +29,7 @@ export async function onRequestPost(context: any): Promise<Response> {
     });
 }
 
-export async function onRequestPut(context: any): Promise<Response> {
-    const { request, env, params, waitUntil, next, data } = context;
-
-    const db: globalThis.Realm.Services.MongoDBDatabase = data.db;
-
-    const updateRequest =
-        (await request.json()) as UpdateBuildingPropertyRequest;
-
-    let propertyData = updateRequest.propertyData;
-
-    // EXAMPLE:: $set { entrances.$[elem].name: propertydata.name }
-    let update: { $set: any } = { $set: {} };
-    update.$set[`${updateRequest.propertyName}.$[elem]`] = propertyData;
-
-    await db
-        .collection('buildings')
-        .updateOne(
-            { _id: { $oid: updateRequest.buildingId } },
-            update,
-            { arrayFilters: [{ 'elem._id': { $oid: updateRequest.propertyId } }] }
-    );
-
-    return new Response('', { status: 204, statusText: 'No Content' });
-}
-
+// TODO: return bad request if request is bad
 // returns 400 bad request if request body is not a valid UpdateRequest
 export async function onRequestDelete(context: any): Promise<Response> {
     const { request, env, params, waitUntil, next, data } = context;

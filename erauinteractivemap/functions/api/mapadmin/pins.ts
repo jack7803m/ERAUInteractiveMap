@@ -1,7 +1,4 @@
-import {
-    CreatePinCategoryRequest,
-    UpdatePinCategoryRequest,
-} from 'shared/models/update-request.model';
+import { CreatePinCategoryRequest } from 'shared/models/update-request.model';
 
 export async function onRequestPost(context: any): Promise<Response> {
     const { request, env, params, waitUntil, next, data } = context;
@@ -20,29 +17,6 @@ export async function onRequestPost(context: any): Promise<Response> {
         status: 200,
         statusText: 'OK',
     });
-}
-
-export async function onRequestPut(context: any): Promise<Response> {
-    const { request, env, params, waitUntil, next, data } = context;
-
-    const db: globalThis.Realm.Services.MongoDBDatabase = data.db;
-
-    const updatePinRequest = (await request.json()) as UpdatePinCategoryRequest;
-
-    await db.collection('pins').updateOne(
-        {
-            _id: { $oid: updatePinRequest.id },
-        },
-        {
-            $set: {
-                category: updatePinRequest.category,
-                color: updatePinRequest.color,
-                icon: updatePinRequest.icon,
-            },
-        }
-    );
-
-    return new Response('', { status: 204, statusText: 'No Content' });
 }
 
 export async function onRequestDelete(context: any): Promise<Response> {
