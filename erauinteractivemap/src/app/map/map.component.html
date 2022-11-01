@@ -9,7 +9,12 @@
 </div>
 
 <div class="search">
-    <mat-form-field>
-        <input matInput type="search" placeholder="Campus Search" [(ngModel)]="searchText" (keyup.enter)="search()">
-    </mat-form-field>
+<ng-multiselect-dropdown
+  [placeholder]="'custom placeholder'"
+  [settings]="dropDownSettings"
+  [data]="testData"
+  [(ngModel)]="searchText"
+  >
+</ng-multiselect-dropdown>
 </div>
+
