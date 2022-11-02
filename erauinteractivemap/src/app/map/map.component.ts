@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import * as L from 'leaflet';
+import { IDropdownSettings } from 'ng-multiselect-dropdown';
 
 @Component({
     selector: 'app-map',
@@ -11,15 +12,28 @@ export class MapComponent implements OnInit {
     toggleW: boolean = true;
     toggleM: boolean = true;
     searchText: string = '';
-    testData = ['gym', 'coas', 'leman'];
-    dropDownSettings = {
-        singleSelection: false,
+    testData = [
+        { item_id: '1', item_name: 'Gym' },
+        { item_id: '2', item_name: 'Coas' },
+        { item_id: '3', item_name: 'Leaman' },
+        { item_id: '4', item_name: 'COAS' },
+        { item_id: '5', item_name: 'COA' },
+        { item_id: '6', item_name: 'COB' },
+        { item_id: '10', item_name: 'COB' },
+    ];
+
+    selectedItems = [
+        { item_id: '10', item_name: 'Campus Search' },
+    ];
+    //ALLOW FOR THE ITEMS TO BE SELECTED
+    dropDownSettings: IDropdownSettings = {
+        singleSelection: true,
         idField: 'item_id',
-        textField: 'item_text',
-        selectAllText: 'Select All',
-        unSelectAllText: 'UnSelect All',
-        itemsShowLimit: 3,
-        allowSearchFilter: true
+        textField: 'item_name',
+        itemsShowLimit: 10,
+        allowSearchFilter: true,
+        closeDropDownOnSelection: true,
+        unSelectAllText: 'Campus Search',
     };
 
     constructor() {
@@ -40,6 +54,7 @@ export class MapComponent implements OnInit {
 
     userLocation?: L.Marker;
     userLocationRadius?: L.Circle;
+
     mapPng: L.Layer = L.imageOverlay('assets/images/vectorymappyNowalk.svg', this.realBounds);
     walkPng: L.Layer = L.imageOverlay('assets/images/walky.svg', this.realBounds);
     satelite: L.Layer = L.tileLayer('https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer/tile/{z}/{y}/{x}');
@@ -164,7 +179,7 @@ export class MapComponent implements OnInit {
         return new L.LatLng(y, x);
     }
 
-    search() {
-        console.log(this.searchText)
+    onItemSelect(ev: any) {
+        console.log(ev);
     }
 }

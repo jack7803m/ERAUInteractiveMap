@@ -10,11 +10,12 @@
 
 <div class="search">
 <ng-multiselect-dropdown
-  [placeholder]="'custom placeholder'"
+style="width: 15vw;"
+  [placeholder]="'Campus Search'"
   [settings]="dropDownSettings"
   [data]="testData"
-  [(ngModel)]="searchText"
-  >
+  [(ngModel)]="selectedItems"
+  (onSelect)="onItemSelect($event)">
 </ng-multiselect-dropdown>
 </div>
 

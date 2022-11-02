@@ -41,7 +41,11 @@
 }
 
 .search{
-position: fixed;
-top: 1em;
-left: 50%;
+    display: flex;
+        width: auto;
+        height: auto;
+        top: 1em;
+        left: 50%;
+        justify-content: center;
+        padding-top: 1rem;
 }
