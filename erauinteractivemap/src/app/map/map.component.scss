@@ -1,43 +1,35 @@
 .main-map {
+    position: absolute;
     height: 100%;
     width: 100%;
-    position: absolute;
     top: 0;
     left: 0;
     z-index: 0;
     background: white;
 }
 .button{
-    position: absolute;
-    top: 0;
-    right: 0;
     background: white;
     border: 1px solid black;
     border-radius: 5px;
     padding: 5px;
-    margin: 5px;
+    z-index: 1;
 }
 
 .button-2 {
-    position: absolute;
-    top: 3%;
-    right: 0;
     background: white;
     border: 1px solid black;
     border-radius: 5px;
     padding: 5px;
     margin: 5px;
+    z-index: 1;
 }
 
 .button-3 {
-    position: absolute;
-    top: 6%;
-    right: 0;
     background: white;
     border: 1px solid black;
     border-radius: 5px;
     padding: 5px;
-    margin: 5px;
+    z-index: 1;
 }
 
 .search{
@@ -48,4 +40,23 @@
         left: 50%;
         justify-content: center;
         padding-top: 1rem;
+        z-index: 1;
+}
+
+ .white-bar {
+position: fixed;
+    display: flex;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 7vh;
+    background: white;
+    z-index: 0;
+    border-radius: 3px;
+    border-color: black;
+    border-style: solid;
+    border-width: 2px;
+    flex-direction: row-reverse;
+    align-items: center;
+    justify-content: center;
 }

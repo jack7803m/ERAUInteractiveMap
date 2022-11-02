@@ -1,21 +1,16 @@
 <div class="main-map" leaflet [leafletOptions]="options" [leafletFitBounds]="imageBounds"
-  (leafletMapReady)="onMapReady($event)" (leafletClick)="onMapClick($event)" >
+    (leafletMapReady)="onMapReady($event)" (leafletClick)="onMapClick($event)">
 </div>
 
-<div>
-    <button (click)="toggleSatelite()" class="button">Satelite</button>
-    <button (click)="toggleWalk()" class="button-2">Paths</button>
-    <button (click)="toggleMap()" class="button-3">Map Overlay</button>
-</div>
+<div class="white-bar">
+    <div style="display: flex;">
+        <button (click)="toggleSatelite()" class="button">Satelite</button>
+        <button (click)="toggleWalk()" class="button-2">Paths</button>
+        <button (click)="toggleMap()" class="button-3">Map Overlay</button>
+    </div>
 
-<div class="search">
-<ng-multiselect-dropdown
-style="width: 15vw;"
-  [placeholder]="'Campus Search'"
-  [settings]="dropDownSettings"
-  [data]="testData"
-  [(ngModel)]="selectedItems"
-  (onSelect)="onItemSelect($event)">
-</ng-multiselect-dropdown>
-</div>
-
+    <div class="search">
+        <ng-multiselect-dropdown style="width: 15vw;" [placeholder]="'Campus Search'" [settings]="dropDownSettings"
+            [data]="testData" [(ngModel)]="selectedItems" (onSelect)="onItemSelect($event)">
+        </ng-multiselect-dropdown>
+    </div>
