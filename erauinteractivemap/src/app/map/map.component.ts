@@ -13,13 +13,20 @@ export class MapComponent implements OnInit {
     toggleM: boolean = true;
     searchText: string = '';
     testData = [
+        { item_id: '16', item_name: 'Campus Safety' },
+        { item_id: '17', item_name: 'Parking Garage' },
+        { item_id: '18', item_name: 'Library' },
+        { item_id: '19', item_name: 'Book Store' },
         { item_id: '1', item_name: 'Gym' },
-        { item_id: '2', item_name: 'Coas' },
-        { item_id: '3', item_name: 'Leaman' },
+        { item_id: '3', item_name: 'COE' },
         { item_id: '4', item_name: 'COAS' },
         { item_id: '5', item_name: 'COA' },
         { item_id: '6', item_name: 'COB' },
-        { item_id: '10', item_name: 'COB' },
+        { item_id: '11', item_name: 'Vending Near Me' },
+        { item_id: '12', item_name: 'Nearest Restroom' },
+        { item_id: '13', item_name: 'Student Union' },
+        { item_id: '14', item_name: 'New Res One' },
+        { item_id: '15', item_name: 'Post Office' },
     ];
 
     selectedItems = [
@@ -69,6 +76,8 @@ export class MapComponent implements OnInit {
         ],
         zoom: 17,
         zoomSnap: 0,
+        zoomControl: false,
+        attributionControl: false,
     };
 
 
@@ -181,5 +190,13 @@ export class MapComponent implements OnInit {
 
     onItemSelect(ev: any) {
         console.log(ev);
+    }
+
+    zoomIn() {
+        this.map?.zoomIn();
+    }
+
+    zoomOut() {
+        this.map?.zoomOut();
     }
 }
