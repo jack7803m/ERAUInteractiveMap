@@ -17,6 +17,8 @@ import { MatInputModule } from '@angular/material/input';
 import { AdminEditComponent } from './admin/admin-edit/admin-edit.component';
 import { AdminMapComponent } from './admin/admin-map/admin-map.component';
 import { NgMultiSelectDropDownModule } from 'ng-multiselect-dropdown';
+import { MatIconModule } from '@angular/material/icon';
+
 
 
 export function tokenGetter() {
@@ -47,7 +49,8 @@ export function tokenGetter() {
         MatButtonModule,
         MatInputModule,
         MatFormFieldModule,
-        NgMultiSelectDropDownModule
+        NgMultiSelectDropDownModule,
+        MatIconModule
     ],
     providers: [],
     bootstrap: [AppComponent],

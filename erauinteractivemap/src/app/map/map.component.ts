@@ -57,7 +57,7 @@ export class MapComponent implements OnInit {
 
     mapPng: L.Layer = L.imageOverlay('assets/images/vectorymappyNowalk.svg', this.realBounds);
     walkPng: L.Layer = L.imageOverlay('assets/images/walky.svg', this.realBounds);
-    satelite: L.Layer = L.tileLayer('https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer/tile/{z}/{y}/{x}');
+    satelite: L.Layer = L.tileLayer('https://{s}.tile.openstreetmap.de/{z}/{x}/{y}.png');
 
 
 

@@ -25,6 +25,8 @@
     "@cloudflare/workers-types": "^3.16.0",
     "bcryptjs": "^2.4.3",
     "leaflet": "^1.8.0",
+    "material": "^0.4.3",
+    "material-icons": "^1.12.1",
     "ng-multiselect-dropdown": "^1.0.0-beta.19",
     "ngx-mat-select-search": "^5.0.0",
     "realm-web": "^1.7.1",
