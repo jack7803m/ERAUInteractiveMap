@@ -95,7 +95,7 @@ export class AdminMapComponent implements OnInit, ICanDeactivate {
         setInterval(() => {
             this.mapDataService.getMapData().subscribe((data) => {
                 // cheap trick but easier than comparing every field
-                if (JSON.stringify(data) !== JSON.stringify(this.oldData)) {
+                if (JSON.stringify(data) !== this.oldData) {
                     this.toastr.warning("Map data has changed. Please refresh to see changes.");
                 }
             })

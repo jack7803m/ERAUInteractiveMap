@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import * as L from 'leaflet';
 import { ToastrService } from 'ngx-toastr';
 import { MapDataService } from '../_services/map-data.service';
+import { IDropdownSettings } from 'ng-multiselect-dropdown';
 
 @Component({
     selector: 'app-map',
@@ -12,8 +13,8 @@ export class MapComponent implements OnInit {
     constructor(private toastr: ToastrService, private mapDataService: MapDataService) {}
 
     public readonly realBounds: L.LatLngBounds = new L.LatLngBounds([
-        [29.185670171901748, -81.05683016856118],
-        [29.198278013324593, -81.04355540378286],
+        [29.185670171901730, -81.05683016856100],
+        [29.198278013324596, -81.0435554037837],
     ]);
 
     public readonly imageBounds: L.LatLngBounds = new L.LatLngBounds([
@@ -26,13 +27,17 @@ export class MapComponent implements OnInit {
     userLocation?: L.Marker;
     userLocationRadius?: L.Circle;
 
+    mapPng: L.Layer = L.imageOverlay('assets/images/vectorymappyNowalk.svg', this.realBounds);
+    walkPng: L.Layer = L.imageOverlay('assets/images/walky.svg', this.realBounds);
+    satelite: L.Layer = L.tileLayer('https://{s}.tile.openstreetmap.de/{z}/{x}/{y}.png');
+
+
+
+
     public options: L.MapOptions = {
         layers: [
-            L.imageOverlay('assets/campus-map-trans.png', this.imageBounds),
-            L.imageOverlay(
-                'assets/campus-map-walkable-trans.png',
-                this.imageBounds
-            ),
+            this.mapPng,
+            this.walkPng,
         ],
         zoom: 17,
         zoomSnap: 0,
@@ -45,7 +50,9 @@ export class MapComponent implements OnInit {
         zoomControl: false,
     };
 
-    ngOnInit(): void {}
+
+
+    ngOnInit(): void { }
 
     // do all configuration here that is not done in the template/options
     // this basically includes 'subscribing' to map events with map.on()
@@ -115,5 +122,17 @@ export class MapComponent implements OnInit {
         let y = ((position.lat - realBottom) / realHeight) * mapHeight;
 
         return new L.LatLng(y, x);
+    }
+
+    onItemSelect(ev: any) {
+        console.log(ev);
+    }
+
+    zoomIn() {
+        this.map?.zoomIn();
+    }
+
+    zoomOut() {
+        this.map?.zoomOut();
     }
 }

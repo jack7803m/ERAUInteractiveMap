@@ -19,6 +19,10 @@ import { MatRadioModule } from '@angular/material/radio';
 import { AdminEditComponent } from './admin/admin-edit/admin-edit.component';
 import { AdminMapComponent } from './admin/admin-map/admin-map.component';
 import { ToastrModule } from 'ngx-toastr';
+import { NgMultiSelectDropDownModule } from 'ng-multiselect-dropdown';
+import { MatIconModule } from '@angular/material/icon';
+
+
 
 export function tokenGetter() {
     return localStorage.getItem('access_token');
@@ -45,13 +49,16 @@ export function tokenGetter() {
         ToastrModule.forRoot(),
         MatCardModule,
         FormsModule,
+        MatButtonModule,
         MatFormFieldModule,
         MatButtonModule,
         MatInputModule,
         MatSelectModule,
         MatRadioModule,
+        NgMultiSelectDropDownModule,
+        MatIconModule
     ],
     providers: [],
     bootstrap: [AppComponent],
 })
-export class AppModule {}
+export class AppModule { }
