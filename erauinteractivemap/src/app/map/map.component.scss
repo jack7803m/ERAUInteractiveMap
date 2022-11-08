@@ -1,9 +1,44 @@
 .main-map {
+    position: absolute;
     height: 100%;
     width: 100%;
-    position: absolute;
     top: 0;
     left: 0;
     z-index: 0;
     background: white;
 }
+
+.search{
+    display: flex;
+        width: auto;
+        height: auto;
+        left: 50%;
+        justify-content: center;
+        z-index: 10;
+}
+
+ .white-bar {
+position: fixed;
+    display: flex;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 4.3vh;
+    background: white;
+    z-index: 0;
+    border-radius: 3px;
+    border-color: black;
+    border-style: solid;
+    border-width: 2px;
+    flex-direction: row-reverse;
+    align-items: center;
+    justify-content: center;
+}
+
+ .iconz {
+    font-size: 24px;
+    transform: scale(1.5);
+    margin-left: 20px;
+    z-index: 10;
+    cursor: pointer;
+ }

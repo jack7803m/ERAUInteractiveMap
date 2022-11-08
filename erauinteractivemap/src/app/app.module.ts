@@ -16,6 +16,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { AdminEditComponent } from './admin/admin-edit/admin-edit.component';
 import { AdminMapComponent } from './admin/admin-map/admin-map.component';
+import { NgMultiSelectDropDownModule } from 'ng-multiselect-dropdown';
+import { MatIconModule } from '@angular/material/icon';
+
+
 
 export function tokenGetter() {
     return localStorage.getItem('access_token');
@@ -40,11 +44,15 @@ export function tokenGetter() {
         BrowserAnimationsModule,
         MatCardModule,
         FormsModule,
+        MatButtonModule,
         MatFormFieldModule,
         MatButtonModule,
         MatInputModule,
+        MatFormFieldModule,
+        NgMultiSelectDropDownModule,
+        MatIconModule
     ],
     providers: [],
     bootstrap: [AppComponent],
 })
-export class AppModule {}
+export class AppModule { }

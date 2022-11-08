@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import * as L from 'leaflet';
+import { IDropdownSettings } from 'ng-multiselect-dropdown';
 
 @Component({
     selector: 'app-map',
@@ -7,11 +8,50 @@ import * as L from 'leaflet';
     styleUrls: ['./map.component.scss'],
 })
 export class MapComponent implements OnInit {
-    constructor() {}
+    toggleS: boolean = false;
+    toggleW: boolean = true;
+    toggleM: boolean = true;
+    searchText: string = '';
+    testData = [
+        { item_id: '16', item_name: 'Campus Safety' },
+        { item_id: '17', item_name: 'Parking Garage' },
+        { item_id: '18', item_name: 'Library' },
+        { item_id: '19', item_name: 'Book Store' },
+        { item_id: '1', item_name: 'Gym' },
+        { item_id: '3', item_name: 'COE' },
+        { item_id: '4', item_name: 'COAS' },
+        { item_id: '5', item_name: 'COA' },
+        { item_id: '6', item_name: 'COB' },
+        { item_id: '11', item_name: 'Vending Near Me' },
+        { item_id: '12', item_name: 'Nearest Restroom' },
+        { item_id: '13', item_name: 'Student Union' },
+        { item_id: '14', item_name: 'New Res One' },
+        { item_id: '15', item_name: 'Post Office' },
+    ];
+
+    selectedItems = [
+        { item_id: '10', item_name: 'Campus Search' },
+    ];
+    //ALLOW FOR THE ITEMS TO BE SELECTED
+    dropDownSettings: IDropdownSettings = {
+        singleSelection: true,
+        idField: 'item_id',
+        textField: 'item_name',
+        itemsShowLimit: 10,
+        allowSearchFilter: true,
+        closeDropDownOnSelection: true,
+        unSelectAllText: 'Campus Search',
+    };
+
+    constructor() {
+    }
+
+    // the bounds of the map in real world coordinates
+    private map?: L.Map;
 
     public readonly realBounds: L.LatLngBounds = new L.LatLngBounds([
-        [29.185670171901748, -81.05683016856118],
-        [29.198278013324593, -81.04355540378286],
+        [29.185670171901730, -81.05683016856100],
+        [29.198278013324596, -81.0435554037837],
     ]);
 
     public readonly imageBounds: L.LatLngBounds = new L.LatLngBounds([
@@ -22,28 +62,32 @@ export class MapComponent implements OnInit {
     userLocation?: L.Marker;
     userLocationRadius?: L.Circle;
 
+    mapPng: L.Layer = L.imageOverlay('assets/images/vectorymappyNowalk.svg', this.realBounds);
+    walkPng: L.Layer = L.imageOverlay('assets/images/walky.svg', this.realBounds);
+    satelite: L.Layer = L.tileLayer('https://{s}.tile.openstreetmap.de/{z}/{x}/{y}.png');
+
+
+
+
     public options: L.MapOptions = {
         layers: [
-            L.imageOverlay('assets/campus-map-trans.png', this.imageBounds),
-            L.imageOverlay(
-                'assets/campus-map-walkable-trans.png',
-                this.imageBounds
-            ),
+            this.mapPng,
+            this.walkPng,
         ],
         zoom: 17,
         zoomSnap: 0,
-        crs: L.CRS.Simple,
-        minZoom: -0.81,
-        maxZoom: 2,
-        maxBounds: this.imageBounds,
-        maxBoundsViscosity: 0.95,
+        zoomControl: false,
+        attributionControl: false,
     };
 
-    ngOnInit(): void {}
+
+
+    ngOnInit(): void { }
 
     // do all configuration here that is not done in the template/options
     // this basically includes 'subscribing' to map events with map.on()
     onMapReady(map: L.Map) {
+        this.map = map;
         map.on('locationfound', (e) => {
             const loc = this.translateRealToMap(e.latlng);
             if (this.userLocation) {
@@ -52,7 +96,7 @@ export class MapComponent implements OnInit {
             } else {
                 this.userLocation = L.marker(loc).addTo(map);
                 this.userLocationRadius = L.circle(loc, {
-                  radius: e.accuracy,
+                    radius: e.accuracy,
                 }).addTo(map);
             }
         });
@@ -78,13 +122,48 @@ export class MapComponent implements OnInit {
         // high accuracy is ideal here because we want it to be as accurate as possible on the small section of map we have
         // watch is true because we want to keep updating the location
         map.locate({ enableHighAccuracy: true, watch: true });
+        map.fitBounds(this.realBounds);
+
     }
+
 
     onMapClick(e: L.LeafletMouseEvent) {
-        console.log(e);
+        console.log(e.latlng);
     }
 
-    // translate a real world lat/lng to a map lat/lng (in pixels from bottom left)
+    toggleSatelite() {
+        this.toggleS = !this.toggleS;
+        if (this.toggleS) {
+            this.map?.addLayer(this.satelite);
+            console.warn("Statlite is on");
+        } else {
+            this.map?.removeLayer(this.satelite);
+            console.warn("Statlite is off");
+        }
+    }
+
+    toggleWalk() {
+        this.toggleW = !this.toggleW;
+        if (this.toggleW) {
+            this.map?.addLayer(this.walkPng);
+            console.warn("Walk is on");
+        } else {
+            this.map?.removeLayer(this.walkPng);
+            console.warn("Walk is off");
+        }
+    }
+
+    toggleMap() {
+        this.toggleM = !this.toggleM;
+        if (this.toggleM) {
+            this.map?.addLayer(this.mapPng);
+            console.warn("Map is on");
+        } else {
+            this.map?.removeLayer(this.mapPng);
+            console.warn("Map is off");
+        }
+    }
+
     translateRealToMap(position: L.LatLng): L.LatLng {
         // as long as this works, don't touch it :)
         const mapLeft = this.imageBounds.getWest();
@@ -107,5 +186,17 @@ export class MapComponent implements OnInit {
         let y = ((position.lat - realBottom) / realHeight) * mapHeight;
 
         return new L.LatLng(y, x);
+    }
+
+    onItemSelect(ev: any) {
+        console.log(ev);
+    }
+
+    zoomIn() {
+        this.map?.zoomIn();
+    }
+
+    zoomOut() {
+        this.map?.zoomOut();
     }
 }

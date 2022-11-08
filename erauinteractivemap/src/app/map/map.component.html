@@ -1,2 +1,18 @@
 <div class="main-map" leaflet [leafletOptions]="options" [leafletFitBounds]="imageBounds"
-  (leafletMapReady)="onMapReady($event)" (leafletClick)="onMapClick($event)"></div>
+    (leafletMapReady)="onMapReady($event)" (leafletClick)="onMapClick($event)">
+</div>
+
+<div class="white-bar">
+    <div style="display: flex;">
+        <mat-icon (click)="zoomIn()" class="iconz">zoom_in</mat-icon>
+        <mat-icon (click)="zoomOut()" class="iconz">zoom_out</mat-icon>
+        <mat-icon (click)="toggleSatelite()" class="iconz">satellite</mat-icon>
+        <mat-icon (click)="toggleWalk()" class="iconz">directions_walk</mat-icon>
+        <mat-icon (click)="toggleMap()" class="iconz">layers</mat-icon>
+    </div>
+
+    <div class="search">
+        <ng-multiselect-dropdown style="width: 15vw;" [placeholder]="'Campus Search'" [settings]="dropDownSettings"
+            [data]="testData" [(ngModel)]="selectedItems" (onSelect)="onItemSelect($event)">
+        </ng-multiselect-dropdown>
+    </div>
