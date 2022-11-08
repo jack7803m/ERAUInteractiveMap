@@ -36,7 +36,8 @@ export function tokenGetter() {
                 tokenGetter: tokenGetter,
                 allowedDomains: [
                     'localhost:4200',
-                    new RegExp('.*\.erauinteractivemap\.pages\.dev'),
+                    'erauinteractivemap.pages.dev',
+                    new RegExp('^.*\.erauinteractivemap\.pages\.dev$'),
                 ],
             },
         }),
