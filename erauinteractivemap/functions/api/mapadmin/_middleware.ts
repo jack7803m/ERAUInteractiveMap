@@ -41,6 +41,8 @@ async function verifyAuthentication(
     token: string,
     secret: string
 ): Promise<boolean> {
+    if (!token) return false;
+
     const tokenParts = token.split(' ');
     if (tokenParts.length !== 2) {
         return false;
