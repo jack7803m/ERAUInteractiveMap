@@ -14,6 +14,8 @@ import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatRadioModule } from '@angular/material/radio';
 import { AdminEditComponent } from './admin/admin-edit/admin-edit.component';
 import { AdminMapComponent } from './admin/admin-map/admin-map.component';
 import { ToastrModule } from 'ngx-toastr';
@@ -45,6 +47,8 @@ export function tokenGetter() {
         MatFormFieldModule,
         MatButtonModule,
         MatInputModule,
+        MatSelectModule,
+        MatRadioModule,
     ],
     providers: [],
     bootstrap: [AppComponent],

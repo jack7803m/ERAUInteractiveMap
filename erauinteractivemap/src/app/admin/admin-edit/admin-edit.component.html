@@ -1,1 +1,126 @@
-<p>admin-edit works!</p>
+<div class="p-3">
+    <h1 class="text-2xl font-extrabold text-center">
+        Pin Category Adding/Editing
+    </h1>
+
+    <div class="flex flex-col w-96 m-auto mt-8">
+        <mat-radio-group
+            (change)="radioChange($event)"
+            class="flex flex-col space-y-2"
+        >
+            <mat-radio-button value="add">Add</mat-radio-button>
+            <mat-radio-button value="edit">Edit</mat-radio-button>
+        </mat-radio-group>
+
+        <div class="h-4"></div>
+
+        <div *ngIf="radioValue === 'add'">
+            <form
+                (ngSubmit)="onSubmitAdd()"
+                #addForm="ngForm"
+                class="flex flex-col space-y-1"
+            >
+                <mat-form-field appearance="outline">
+                    <input
+                        matInput
+                        required
+                        placeholder="Category Name"
+                        [(ngModel)]="pinAddForm.category"
+                        name="category"
+                    />
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                    <input
+                        matInput
+                        required
+                        placeholder="Pin Color"
+                        [(ngModel)]="pinAddForm.color"
+                        name="color"
+                    />
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                    <input
+                        matInput
+                        required
+                        placeholder="Pin Icon"
+                        [(ngModel)]="pinAddForm.icon"
+                        name="icon"
+                    />
+                </mat-form-field>
+
+                <button
+                    mat-raised-button
+                    color="primary"
+                    [disabled]="addForm.invalid"
+                    type="submit"
+                >
+                    Add
+                </button>
+            </form>
+        </div>
+        <div *ngIf="radioValue === 'edit'">
+            <form
+                (ngSubmit)="onSubmitEdit()"
+                #editForm="ngForm"
+                class="flex flex-col space-y-1"
+            >
+                <mat-form-field appearance="outline">
+                    <mat-label>Pin Categories</mat-label>
+                    <mat-select
+                        (selectionChange)="editValueChange()"
+                        [(ngModel)]="pinEditForm.id"
+                        name="id"
+                    >
+                        <mat-option
+                            *ngFor="let pin of mapData?.pins"
+                            [value]="pin._id"
+                        >
+                            {{ pin._id + " (" + pin.category + ")" }}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                    <input
+                        matInput
+                        required
+                        placeholder="Category Name"
+                        [(ngModel)]="pinEditForm.category"
+                        name="category"
+                    />
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                    <input
+                        matInput
+                        required
+                        placeholder="Pin Color"
+                        [(ngModel)]="pinEditForm.color"
+                        name="color"
+                    />
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                    <input
+                        matInput
+                        required
+                        placeholder="Pin Icon"
+                        [(ngModel)]="pinEditForm.icon"
+                        name="icon"
+                    />
+                </mat-form-field>
+
+                <button
+                    mat-raised-button
+                    color="primary"
+                    [disabled]="editForm.invalid"
+                    type="submit"
+                >
+                    Save
+                </button>
+            </form>
+        </div>
+    </div>
+</div>

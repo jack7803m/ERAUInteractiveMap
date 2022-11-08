@@ -4,5 +4,4 @@ export enum BuildingPropertyName {
     MATERNITY = 'maternity',
     VENDING = 'vending',
     EMERGENCY = 'emergency',
-    CHILDREN = 'children',
 }

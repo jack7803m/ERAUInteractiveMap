@@ -12,6 +12,7 @@ export async function onRequestPost(context: any): Promise<Response> {
         description: createRequest.description,
         location: createRequest.location,
         category: createRequest.category,
+        children: []
     });
 
     return new Response(JSON.stringify({ id: resultDocument.insertedId }), {

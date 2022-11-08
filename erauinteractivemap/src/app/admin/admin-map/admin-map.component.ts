@@ -1,10 +1,13 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, EmbeddedViewRef, HostListener, OnInit, TemplateRef, ViewChild, ViewContainerRef } from '@angular/core';
+import { MatRadioChange } from '@angular/material/radio';
 import * as L from 'leaflet';
 import { ToastrService } from 'ngx-toastr';
-import { DatabaseSchema } from 'shared/models/database-schema.model';
+import { BuildingPropertyName } from 'shared/enums/database-schema.enum';
+import { Building, BuildingChild, DatabaseSchema, Pin } from 'shared/models/database-schema.model';
 import { ICanDeactivate } from 'src/app/_interfaces/ICanDeactivate.interface';
 import { AdminService } from 'src/app/_services/admin.service';
 import { MapDataService } from 'src/app/_services/map-data.service';
+
 
 @Component({
     selector: 'app-admin-map',
@@ -12,7 +15,7 @@ import { MapDataService } from 'src/app/_services/map-data.service';
     styleUrls: ['./admin-map.component.scss'],
 })
 export class AdminMapComponent implements OnInit, ICanDeactivate {
-    constructor(private mapDataService: MapDataService, private adminService: AdminService, private toastr: ToastrService) { }
+    constructor(private mapDataService: MapDataService, private adminService: AdminService, private toastr: ToastrService, private viewRef: ViewContainerRef) { }
 
     public readonly realBounds: L.LatLngBounds = new L.LatLngBounds([
         [29.185670171901748, -81.05683016856118],
@@ -25,9 +28,31 @@ export class AdminMapComponent implements OnInit, ICanDeactivate {
     ]);
 
     private map?: L.Map;
-    private oldData?: DatabaseSchema;
-    private newData?: DatabaseSchema;
-    private changes: boolean = false;
+    private oldData?: string; // this is ONLY to keep track of whether there are new changes in the database
+    private mapData?: DatabaseSchema;
+    changes: boolean = false;
+
+    modalRadioValue: 'building' | 'child' | '' = '';
+    pinCategories: Pin[] = [];
+    buildings: Building[] = []; // TODO: update this when buildings are added
+    childTypeEnum = Object.values(BuildingPropertyName);
+
+    buildingAddForm = {
+        name: '',
+        description: '',
+        category: ''
+    }
+
+    childAddForm = {
+        building: '',
+        name: '',
+        type: '',
+        description: '',
+        category: ''
+    }
+
+    @ViewChild('modalFormTemplate') modalTemplate?: TemplateRef<any>;
+    openModal?: EmbeddedViewRef<any>;
 
     userLocation?: L.Marker;
     userLocationRadius?: L.Circle;
@@ -53,8 +78,18 @@ export class AdminMapComponent implements OnInit, ICanDeactivate {
 
     ngOnInit(): void {
         this.mapDataService.getMapData().subscribe((data) => {
-            this.oldData = data;
-            this.newData = data;
+            this.oldData = JSON.stringify(data);
+            this.mapData = data;
+            this.pinCategories = data.pins;
+            this.buildings = data.buildings;
+
+            // add all POIs to the map
+            data.buildings.forEach((building) => {
+                this.createBuildingMarker(building);
+                building.children.forEach((child) => {
+                    this.createChildMarker(child);
+                });
+            })
         });
 
         setInterval(() => {
@@ -116,19 +151,171 @@ export class AdminMapComponent implements OnInit, ICanDeactivate {
     }
 
     addMarkerToMap() {
-        if (this.map) {
-            L.marker(this.map.getCenter(), { draggable: true, autoPan: true }).addTo(this.map);
-        }
+        if (!this.map || !this.modalTemplate) return;
+
+        this.openModal = this.viewRef.createEmbeddedView(this.modalTemplate)
+    }
+
+    closeModal() {
+        if (!this.openModal) return;
+
+        this.openModal.destroy();
     }
 
     applyChanges() {
-        if (this.oldData) {
-            this.adminService.applyChanges(this.oldData, this.newData ?? this.oldData);
+        if (this.mapData && this.changes) {
+            console.log("Applying changes")
+            this.adminService.applyChanges(this.mapData).subscribe({
+                next: () => {
+                    this.changes = false;
+                    this.toastr.success("Changes applied successfully!");
+                    this.mapDataService.getMapData().subscribe((data) => {
+                        this.oldData = JSON.stringify(data);
+                        this.mapData = data;
+                        this.pinCategories = data.pins;
+                        this.buildings = data.buildings;
+
+                        // clear all markers, then add all POIs to the map
+                        this.map?.eachLayer((layer) => {
+                            if (layer instanceof L.Marker) {
+                                layer.remove();
+                            }
+                        });
+                        data.buildings.forEach((building) => {
+                            this.createBuildingMarker(building);
+                            building.children.forEach((child) => {
+                                this.createChildMarker(child);
+                            });
+                        });
+                    });
+                },
+                error: (err) => {
+                    this.toastr.error("Error applying changes: " + err);
+                }
+            });
         }
     }
 
+    radioChange(event: MatRadioChange) {
+        this.modalRadioValue = event.value;
+    }
+
+    onSubmitAddBuilding() {
+        if (!this.map || !this.mapData) return; // should never happen
+
+        const location = this.map.getCenter();
+
+        this.adminService.createBuilding({
+            name: this.buildingAddForm.name,
+            description: this.buildingAddForm.description,
+            category: this.buildingAddForm.category as any,
+            location,
+        }).subscribe({
+            next: (data) => {
+                let newBuilding: Building = {
+                    _id: data.id,
+                    name: this.buildingAddForm.name,
+                    description: this.buildingAddForm.description,
+                    category: this.buildingAddForm.category as any,
+                    location,
+                    children: []
+                }
+
+                this.mapData?.buildings.push(newBuilding);
+                this.buildings.push(newBuilding);
+
+                this.createBuildingMarker(newBuilding);
+
+                this.buildingAddForm = {
+                    name: '',
+                    description: '',
+                    category: ''
+                }
+                this.closeModal();
+            }, error: (err) => {
+                this.toastr.error("Error creating building: " + err);
+            }
+        });
+    }
+
+    onSubmitAddChild() {
+        if (!this.map || !this.mapData) return; // should never happen
+
+        const location = this.map.getCenter();
+
+        this.adminService.createBuildingProperty({
+            buildingId: this.childAddForm.building as any,
+            propertyData: {
+                name: this.childAddForm.name,
+                description: this.childAddForm.description,
+                category: this.childAddForm.category as any,
+                location,
+                type: this.childAddForm.type as any,
+            }
+        }).subscribe({
+            next: (data) => {
+                let newChild: BuildingChild = {
+                    _id: data.id,
+                    name: this.childAddForm.name,
+                    description: this.childAddForm.description,
+                    category: this.childAddForm.category as any,
+                    location,
+                    type: this.childAddForm.type as any
+                }
+
+                this.mapData?.buildings.find(b => b._id.toString() === this.childAddForm.building)?.children.push(newChild);
+
+                this.createChildMarker(newChild);
+
+                this.childAddForm = {
+                    name: '',
+                    description: '',
+                    category: '',
+                    building: '',
+                    type: ''
+                }
+                this.closeModal();
+            }, error: (err) => {
+                this.toastr.error("Error creating child: " + err);
+            }
+        });
+    }
+
+    private createBuildingMarker(building: Building) {
+        const marker = L.marker(building.location, { draggable: true, autoPan: true }).addTo(this.map!);
+
+        marker.on('dragend', (e: L.DragEndEvent) => {
+            this.changes = true;
+            const newLocation = e.target.getLatLng();
+            let b = this.mapData?.buildings.find(b => b._id.toString() === building._id.toString());
+            if (b) {
+                b.location = newLocation;
+            } else {
+                this.toastr.error("Error updating building location");
+            }
+        });
+    }
+
+    private createChildMarker(child: BuildingChild) {
+        const marker = L.marker(child.location, { draggable: true, autoPan: true }).addTo(this.map!);
+
+        marker.on('dragend', (e: L.DragEndEvent) => {
+            this.changes = true;
+            const newLocation = e.target.getLatLng();
+            // find the child in the map data
+            let b = this.mapData?.buildings.find(b => b.children.find(c => c._id.toString() === child._id.toString()));
+            let c = b?.children.find(c => c._id.toString() === child._id.toString());
+
+            if (c) {
+                c.location = newLocation;
+            } else {
+                this.toastr.error("Error updating child location");
+            }
+        });
+    }
+
     // translate a real world lat/lng to a map lat/lng (in pixels from bottom left)
-    translateRealToMap(position: L.LatLng): L.LatLng {
+    private translateRealToMap(position: L.LatLng): L.LatLng {
         // as long as this works, don't touch it :)
         const mapLeft = this.imageBounds.getWest();
         const mapBottom = this.imageBounds.getSouth();

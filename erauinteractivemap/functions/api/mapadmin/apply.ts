@@ -1,53 +1,35 @@
-import { ApplyChangesRequest } from 'shared/models/update-request.model';
-
 // route: /api/mapadmin/apply
 // the purpose of this function is to compare the old data to the new data and apply any changes in the database
 // this function is called when the user clicks the "Apply Changes" button in the admin panel
+
+import { Building, DatabaseSchema, Pin } from "shared/models/database-schema.model";
+
 // ! NOTE: this function does not create or delete anything. it only updates fields that already exist in the database
 export async function onRequestPost(context: any): Promise<Response> {
     const { request, env, params, waitUntil, next, data } = context;
 
     const db: globalThis.Realm.Services.MongoDBDatabase = data.db;
 
-    const changeRequest = (await request.json()) as ApplyChangesRequest;
+    const newData = (await request.json()) as DatabaseSchema;
 
+    // go fetch the old data from the database
+    let allBuildings = await db.collection('buildings').find() as Building[];
+    let allPins = await db.collection('pins').find() as Pin[];
+
+    let oldData: DatabaseSchema = {
+        buildings: allBuildings,
+        pins: allPins,
+    };
+
+    console.log(JSON.stringify(newData));
+    console.log(JSON.stringify(oldData));
     // compare the old data to the new data and apply any changes
-    // * first check all the pins
-    for (const oldPin of changeRequest.oldData.pins) {
-        const updatedPin = changeRequest.newData.pins.find((pin) => {
-            if (pin._id !== oldPin._id) {
-                return false;
-            }
-
-            if (pin.category !== oldPin.category || pin.color !== oldPin.color || pin.icon !== oldPin.icon) {
-                return true;
-            }
-            else {
-                return false;
-            }
-        });
-
-        if (!updatedPin) continue;
-
-        // not awaiting the database call because we don't care about the result. hopefully it updates ¯\_(ツ)_/¯
-        db.collection('pins').updateOne(
-            {
-                _id: { $oid: updatedPin._id },
-            },
-            {
-                $set: {
-                    category: updatedPin.category,
-                    color: updatedPin.color,
-                    icon: updatedPin.icon,
-                },
-            }
-        );
-    }
 
     // * next check all the buildings
-    for (const oldBuilding of changeRequest.oldData.buildings) {
-        const updatedBuilding = changeRequest.newData.buildings.find((building) => {
-            if (building._id !== oldBuilding._id) {
+    for (const oldBuilding of oldData.buildings) {
+        const updatedBuilding = newData.buildings.find((building) => {
+            if (building._id.toString() !== oldBuilding._id.toString()) {
+
                 return false;
             }
 
@@ -78,19 +60,22 @@ export async function onRequestPost(context: any): Promise<Response> {
     }
 
     // * finally check all the building properties
-    for (const oldBuilding of changeRequest.oldData.buildings) {
-        const newBuilding = changeRequest.newData.buildings.find((building) => { return building._id === oldBuilding._id; });
+    for (const oldBuilding of oldData.buildings) {
+        const building = newData.buildings.find((building) => { return building._id.toString() === oldBuilding._id.toString(); });
 
-        if (!newBuilding) continue; // this should never happen
+        if (!building) continue; // this should never happen
 
         for (const oldProperty of oldBuilding.children) {
-            const updatedProperty = newBuilding.children.find((property) => {
-                if (property._id !== oldProperty._id) {
+            const updatedProperty = building.children.find((property) => {
+                if (property._id.toString() !== oldProperty._id.toString()) {
                     return false;
                 }
 
-                for (const key in Object.keys(property)) {
-                    if ((property as any)[key] !== (oldProperty as any)[key]) {
+                for (let i = 0; i < Object.values(property).length; i++) {
+                    const oldValue = Object.values(oldProperty)[i];
+                    const newValue = Object.values(property)[i];
+
+                    if (oldValue !== newValue) {
                         return true;
                     }
                 }
@@ -101,13 +86,13 @@ export async function onRequestPost(context: any): Promise<Response> {
             if (!updatedProperty) continue;
 
             let update: { $set: any } = { $set: {} };
-            update.$set['$[elem]'] = updatedProperty;
+            update.$set['children.$[elem]'] = updatedProperty;
 
             // not awaiting the database call because we don't care about the result. hopefully it updates ¯\_(ツ)_/¯
             db.collection('buildings').updateOne(
-                { _id: { $oid: newBuilding._id } },
+                { _id: { $oid: building._id } },
                 update,
-                { arrayFilters: [{ 'elem._id': { $oid: updatedProperty._id } }] }
+                { arrayFilters: [{ 'elem._id': updatedProperty._id }] }
             );
         }
 

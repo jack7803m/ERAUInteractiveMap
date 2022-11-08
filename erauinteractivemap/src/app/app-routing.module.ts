@@ -25,7 +25,7 @@ const routes: Routes = [
         path: 'admin/map',
         component: AdminMapComponent,
         canDeactivate: [DeactivateGuard],
-        // canActivate: [AuthGuard],
+        canActivate: [AuthGuard],
     },
     {
         path: '**',
