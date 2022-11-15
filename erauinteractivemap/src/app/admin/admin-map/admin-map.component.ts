@@ -34,7 +34,7 @@ export class AdminMapComponent implements OnInit, ICanDeactivate {
 
     modalRadioValue: 'building' | 'child' | '' = '';
     pinCategories: Pin[] = [];
-    buildings: Building[] = []; // TODO: update this when buildings are added
+    buildings: Building[] = [];
     childTypeEnum = Object.values(BuildingPropertyName);
 
     buildingAddForm = {
@@ -51,7 +51,18 @@ export class AdminMapComponent implements OnInit, ICanDeactivate {
         category: ''
     }
 
+    placeInfoForm = {
+        id: '',
+        name: '',
+        description: '',
+        category: '',
+        type: '',
+        child: false // child switch to tell if we need to show type or not
+    }
+
     @ViewChild('modalFormTemplate') modalTemplate?: TemplateRef<any>;
+    @ViewChild('editModalTemplate') editModalTemplate?: TemplateRef<any>;
+    @ViewChild('placeInfoModalTemplate') placeInfoModalTemplate?: TemplateRef<any>;
     openModal?: EmbeddedViewRef<any>;
 
     userLocation?: L.Marker;
@@ -59,9 +70,9 @@ export class AdminMapComponent implements OnInit, ICanDeactivate {
 
     public options: L.MapOptions = {
         layers: [
-            L.imageOverlay('assets/campus-map-trans.png', this.imageBounds),
+            L.imageOverlay('assets/images/campus-map-trans.png', this.imageBounds),
             L.imageOverlay(
-                'assets/campus-map-walkable-trans.png',
+                'assets/images/campus-map-walkable-trans.png',
                 this.imageBounds
             ),
         ],
@@ -154,6 +165,18 @@ export class AdminMapComponent implements OnInit, ICanDeactivate {
         if (!this.map || !this.modalTemplate) return;
 
         this.openModal = this.viewRef.createEmbeddedView(this.modalTemplate)
+    }
+
+    openPinEdit() {
+        if (!this.map || !this.editModalTemplate) return;
+
+        this.openModal = this.viewRef.createEmbeddedView(this.editModalTemplate);
+    }
+
+    openPlaceInfoModal() {
+        if (!this.map || !this.placeInfoModalTemplate) return;
+
+        this.openModal = this.viewRef.createEmbeddedView(this.placeInfoModalTemplate);
     }
 
     closeModal() {
@@ -281,6 +304,29 @@ export class AdminMapComponent implements OnInit, ICanDeactivate {
         });
     }
 
+    onSubmitEditPlace() {
+        if (!this.mapData) return;
+        // search through mapdata, find the building/child and update it
+        if (this.placeInfoForm.child) {
+            let child: BuildingChild | undefined = this.mapData.buildings.flatMap(b => b.children).find(c => c._id.toString() === this.placeInfoForm.id);
+
+            if (child) {
+                child.name = this.placeInfoForm.name;
+                child.description = this.placeInfoForm.description;
+                child.category = this.placeInfoForm.category as any;
+                child.type = this.placeInfoForm.type as any;
+            }
+        } else {
+            let building: Building | undefined = this.mapData.buildings.find(b => b._id.toString() === this.placeInfoForm.id);
+
+            if (building) {
+                building.name = this.placeInfoForm.name;
+                building.description = this.placeInfoForm.description;
+                building.category = this.placeInfoForm.category as any;
+            }
+        }
+    }
+
     private createBuildingMarker(building: Building) {
         const marker = L.marker(building.location, { draggable: true, autoPan: true }).addTo(this.map!);
 
@@ -293,6 +339,19 @@ export class AdminMapComponent implements OnInit, ICanDeactivate {
             } else {
                 this.toastr.error("Error updating building location");
             }
+        });
+
+        marker.on('click', (e: L.LeafletMouseEvent) => {
+            this.openPlaceInfoModal();
+
+            this.placeInfoForm = {
+                id: building._id.toString(),
+                name: building.name,
+                description: building.description,
+                category: building.category.toString(),
+                type: '',
+                child: false
+            };
         });
     }
 
@@ -311,6 +370,19 @@ export class AdminMapComponent implements OnInit, ICanDeactivate {
             } else {
                 this.toastr.error("Error updating child location");
             }
+        });
+
+        marker.on('click', (e: L.LeafletMouseEvent) => {
+            this.openPlaceInfoModal();
+
+            this.placeInfoForm = {
+                id: child._id.toString(),
+                name: child.name,
+                description: child.description,
+                category: child.category.toString(),
+                type: child.type?.toString() ?? '',
+                child: true
+            };
         });
     }
 
