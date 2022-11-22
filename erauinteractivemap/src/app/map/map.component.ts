@@ -3,6 +3,7 @@ import * as L from 'leaflet';
 import { ToastrService } from 'ngx-toastr';
 import { MapDataService } from '../_services/map-data.service';
 import { IDropdownSettings } from 'ng-multiselect-dropdown';
+import { Building, BuildingChild, DatabaseSchema, Pin } from 'shared/models/database-schema.model';
 
 @Component({
     selector: 'app-map',
@@ -10,7 +11,7 @@ import { IDropdownSettings } from 'ng-multiselect-dropdown';
     styleUrls: ['./map.component.scss'],
 })
 export class MapComponent implements OnInit {
-    constructor(private toastr: ToastrService, private mapDataService: MapDataService) {}
+    constructor(private toastr: ToastrService, private mapDataService: MapDataService) { }
 
     public readonly realBounds: L.LatLngBounds = new L.LatLngBounds([
         [29.185670171901730, -81.05683016856100],
@@ -31,8 +32,12 @@ export class MapComponent implements OnInit {
     walkPng: L.Layer = L.imageOverlay('assets/images/walky.svg', this.realBounds);
     satelite: L.Layer = L.tileLayer('https://{s}.tile.openstreetmap.de/{z}/{x}/{y}.png');
 
+    mapData?: DatabaseSchema;
+    pinCategories?: Pin[];
+    buildings?: Building[];
 
-
+    infoDisplayObject?: Building | BuildingChild;
+    displayInfo: boolean = false;
 
     public options: L.MapOptions = {
         layers: [
@@ -57,6 +62,21 @@ export class MapComponent implements OnInit {
     // do all configuration here that is not done in the template/options
     // this basically includes 'subscribing' to map events with map.on()
     onMapReady(map: L.Map) {
+        this.mapDataService.getMapData();
+
+        this.mapDataService.mapData.subscribe((data) => {
+            this.mapData = data;
+            this.pinCategories = data.pins;
+            this.buildings = data.buildings;
+
+            data.buildings.forEach(building => {
+                this.createBuildingMarker(building);
+                building.children.forEach(child => {
+                    this.createChildMarker(child);
+                })
+            })
+        })
+
         this.map = map;
         map.on('locationfound', (e) => {
             const loc = this.translateRealToMap(e.latlng);
@@ -134,5 +154,23 @@ export class MapComponent implements OnInit {
 
     zoomOut() {
         this.map?.zoomOut();
+    }
+
+    createBuildingMarker(building: Building) {
+        const marker = L.marker(building.location).addTo(this.map!);
+
+        marker.on('click', (e: L.LeafletMouseEvent) => {
+            this.infoDisplayObject = building;
+            this.displayInfo = true;
+        });
+    }
+
+    createChildMarker(child: BuildingChild) {
+        const marker = L.marker(child.location).addTo(this.map!);
+
+        marker.on('click', (e: L.LeafletMouseEvent) => {
+            this.infoDisplayObject = child;
+            this.displayInfo = true;
+        });
     }
 }

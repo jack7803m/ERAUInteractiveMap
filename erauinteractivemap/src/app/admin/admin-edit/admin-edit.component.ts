@@ -33,18 +33,15 @@ export class AdminEditComponent implements OnInit, ICanDeactivate {
   }
 
   ngOnInit(): void {
-    this.mapDataService.getMapData().subscribe((data) => {
+    this.mapDataService.getMapData();
+    this.mapDataService.mapData.subscribe((data) => {
       this.mapData = data;
     });
 
+    // update the map data every minute
     setInterval(() => {
-      this.mapDataService.getMapData().subscribe((data) => {
-        // cheap trick but easier than comparing every field
-        if (JSON.stringify(data) !== JSON.stringify(this.mapData)) {
-          this.toastr.warning("Map data has changed. Please refresh to see changes.");
-        }
-      })
-    }, 120_000);
+      this.mapDataService.getMapData();
+    }, 60000);
   }
 
   canDeactivate(): boolean {

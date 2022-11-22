@@ -21,6 +21,7 @@ import { AdminMapComponent } from './admin/admin-map/admin-map.component';
 import { ToastrModule } from 'ngx-toastr';
 import { NgMultiSelectDropDownModule } from 'ng-multiselect-dropdown';
 import { MatIconModule } from '@angular/material/icon';
+import { InfoDisplayComponent } from './_shared/info-display/info-display.component';
 
 
 
@@ -29,7 +30,7 @@ export function tokenGetter() {
 }
 
 @NgModule({
-    declarations: [AppComponent, MapComponent, AdminLoginComponent, AdminEditComponent, AdminMapComponent],
+    declarations: [AppComponent, MapComponent, AdminLoginComponent, AdminEditComponent, AdminMapComponent, InfoDisplayComponent],
     imports: [
         BrowserModule,
         AppRoutingModule,
