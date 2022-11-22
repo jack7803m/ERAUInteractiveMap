@@ -1,0 +1,9 @@
+<div class="p-3 w-full h-full">
+    <div *ngIf="!editable" class="flex flex-col">
+        <h1>{{ markerData?.name }}</h1>
+        <p>{{ markerData?.description }}</p>
+    </div>
+    <div *ngIf="editable" class="flex flex-col">
+        <form></form>
+    </div>
+</div>

@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import * as L from 'leaflet';
 import { ToastrService } from 'ngx-toastr';
 import { MapDataService } from '../_services/map-data.service';
 import { IDropdownSettings } from 'ng-multiselect-dropdown';
 import { Building, BuildingChild, DatabaseSchema, Pin } from 'shared/models/database-schema.model';
+import { InfoDisplayComponent } from '../_shared/info-display/info-display.component';
 
 @Component({
     selector: 'app-map',
@@ -11,7 +12,7 @@ import { Building, BuildingChild, DatabaseSchema, Pin } from 'shared/models/data
     styleUrls: ['./map.component.scss'],
 })
 export class MapComponent implements OnInit {
-    constructor(private toastr: ToastrService, private mapDataService: MapDataService) { }
+    constructor(private toastr: ToastrService, private mapDataService: MapDataService, private cdr: ChangeDetectorRef) { }
 
     public readonly realBounds: L.LatLngBounds = new L.LatLngBounds([
         [29.185670171901730, -81.05683016856100],
@@ -25,11 +26,13 @@ export class MapComponent implements OnInit {
 
     private map?: L.Map;
 
+    @ViewChild('infoDisplay') infoDisplay?: InfoDisplayComponent;
+
     userLocation?: L.Marker;
     userLocationRadius?: L.Circle;
 
-    mapPng: L.Layer = L.imageOverlay('assets/images/vectorymappyNowalk.svg', this.realBounds);
-    walkPng: L.Layer = L.imageOverlay('assets/images/walky.svg', this.realBounds);
+    mapPng: L.Layer = L.imageOverlay('assets/images/campus-map-trans.png', this.imageBounds);
+    walkPng: L.Layer = L.imageOverlay('assets/images/campus-map-walkable-trans.png', this.imageBounds);
     satelite: L.Layer = L.tileLayer('https://{s}.tile.openstreetmap.de/{z}/{x}/{y}.png');
 
     mapData?: DatabaseSchema;
@@ -78,6 +81,10 @@ export class MapComponent implements OnInit {
         })
 
         this.map = map;
+        map.on('click', () => {
+            this.displayInfo = false;
+            this.cdr.detectChanges();
+        })
         map.on('locationfound', (e) => {
             const loc = this.translateRealToMap(e.latlng);
             if (this.userLocation) {
@@ -148,20 +155,13 @@ export class MapComponent implements OnInit {
         console.log(ev);
     }
 
-    zoomIn() {
-        this.map?.zoomIn();
-    }
-
-    zoomOut() {
-        this.map?.zoomOut();
-    }
-
     createBuildingMarker(building: Building) {
         const marker = L.marker(building.location).addTo(this.map!);
 
         marker.on('click', (e: L.LeafletMouseEvent) => {
             this.infoDisplayObject = building;
             this.displayInfo = true;
+            this.cdr.detectChanges();
         });
     }
 
@@ -171,6 +171,7 @@ export class MapComponent implements OnInit {
         marker.on('click', (e: L.LeafletMouseEvent) => {
             this.infoDisplayObject = child;
             this.displayInfo = true;
+            this.cdr.detectChanges();
         });
     }
 }

@@ -282,23 +282,3 @@
         </div>
     </div>
 </ng-template>
-
-<ng-template #placeInfoModalTemplate>
-    <div
-        id="placeInfo"
-        class="w-80 ml-4 mb-12 rounded-md pointer-events-auto p-6 flex flex-col drop-shadow-lg bg-white border border-black"
-    >
-        <form (ngSubmit)="onSubmitEditPlace()" #infoForm="ngForm" class="">
-            <mat-form-field>
-                <mat-label>Name</mat-label>
-                <input
-                    matInput
-                    type="text"
-                    name="placeName"
-                    [(ngModel)]="placeInfoForm.name"
-                    required
-                />
-            </mat-form-field>
-        </form>
-    </div>
-</ng-template>

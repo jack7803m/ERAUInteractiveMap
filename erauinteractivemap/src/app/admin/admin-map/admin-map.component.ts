@@ -63,7 +63,6 @@ export class AdminMapComponent implements OnInit, ICanDeactivate {
 
     @ViewChild('modalFormTemplate') modalTemplate?: TemplateRef<any>;
     @ViewChild('editModalTemplate') editModalTemplate?: TemplateRef<any>;
-    @ViewChild('placeInfoModalTemplate') placeInfoModalTemplate?: TemplateRef<any>;
     openModal?: EmbeddedViewRef<any>;
 
     userLocation?: L.Marker;
@@ -177,12 +176,6 @@ export class AdminMapComponent implements OnInit, ICanDeactivate {
         if (!this.map || !this.editModalTemplate) return;
 
         this.openModal = this.viewRef.createEmbeddedView(this.editModalTemplate);
-    }
-
-    openPlaceInfoModal() {
-        if (!this.map || !this.placeInfoModalTemplate) return;
-
-        this.openModal = this.viewRef.createEmbeddedView(this.placeInfoModalTemplate);
     }
 
     closeModal() {
@@ -337,6 +330,8 @@ export class AdminMapComponent implements OnInit, ICanDeactivate {
     }
 
     private createBuildingMarker(building: Building) {
+        let pin = this.pinCategories?.find(pin => pin._id === building.category);
+        let icon = pin?.icon;
         const marker = L.marker(building.location, { draggable: true, autoPan: true }).addTo(this.map!);
 
         marker.on('dragend', (e: L.DragEndEvent) => {
@@ -348,19 +343,6 @@ export class AdminMapComponent implements OnInit, ICanDeactivate {
             } else {
                 this.toastr.error("Error updating building location");
             }
-        });
-
-        marker.on('click', (e: L.LeafletMouseEvent) => {
-            this.openPlaceInfoModal();
-
-            this.placeInfoForm = {
-                id: building._id.toString(),
-                name: building.name,
-                description: building.description,
-                category: building.category.toString(),
-                type: '',
-                child: false
-            };
         });
     }
 
@@ -379,19 +361,6 @@ export class AdminMapComponent implements OnInit, ICanDeactivate {
             } else {
                 this.toastr.error("Error updating child location");
             }
-        });
-
-        marker.on('click', (e: L.LeafletMouseEvent) => {
-            this.openPlaceInfoModal();
-
-            this.placeInfoForm = {
-                id: child._id.toString(),
-                name: child.name,
-                description: child.description,
-                category: child.category.toString(),
-                type: child.type?.toString() ?? '',
-                child: true
-            };
         });
     }
 

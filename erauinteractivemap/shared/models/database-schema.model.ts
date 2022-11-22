@@ -24,9 +24,9 @@ export interface BuildingChild {
     _id: Realm.BSON.ObjectId;
     type: BuildingPropertyName | undefined;
     name: string;
+    description: string;
     location: PointLocation;
     category: Realm.BSON.ObjectId;
-    description: string;
 }
 
 export interface Pin extends globalThis.Realm.Services.MongoDB.Document {
