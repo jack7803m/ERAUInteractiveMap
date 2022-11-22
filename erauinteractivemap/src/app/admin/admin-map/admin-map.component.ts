@@ -2,6 +2,7 @@ import { Component, EmbeddedViewRef, HostListener, OnInit, TemplateRef, ViewChil
 import { MatRadioChange } from '@angular/material/radio';
 import * as L from 'leaflet';
 import { ToastrService } from 'ngx-toastr';
+import { take } from 'rxjs';
 import { BuildingPropertyName } from 'shared/enums/database-schema.enum';
 import { Building, BuildingChild, DatabaseSchema, Pin } from 'shared/models/database-schema.model';
 import { ICanDeactivate } from 'src/app/_interfaces/ICanDeactivate.interface';
@@ -77,28 +78,33 @@ export class AdminMapComponent implements OnInit, ICanDeactivate {
     };
 
     ngOnInit(): void {
-        this.mapDataService.getMapData().subscribe((data) => {
+        this.mapDataService.getMapData();
+
+        // we want to get/set the map data ONCE when the component is initialized - otherwise admin changes would be overwritten
+        this.mapDataService.mapData.pipe(take(1)).subscribe(data => {
             this.oldData = JSON.stringify(data);
             this.mapData = data;
             this.pinCategories = data.pins;
             this.buildings = data.buildings;
 
-            // add all POIs to the map
-            data.buildings.forEach((building) => {
+            data.buildings.forEach(building => {
                 this.createBuildingMarker(building);
-                building.children.forEach((child) => {
+                building.children.forEach(child => {
                     this.createChildMarker(child);
                 });
-            })
+            });
         });
 
+        // we want to COMPARE the map data EVERY time it changes - if it changes, we warn the user
+        this.mapDataService.mapData.subscribe((data) => {
+            // cheap trick but easier than comparing every field
+            if (JSON.stringify(data) !== this.oldData) {
+                this.toastr.warning("Map data has changed. Please refresh to see changes.");
+            }
+        })
+
         setInterval(() => {
-            this.mapDataService.getMapData().subscribe((data) => {
-                // cheap trick but easier than comparing every field
-                if (JSON.stringify(data) !== this.oldData) {
-                    this.toastr.warning("Map data has changed. Please refresh to see changes.");
-                }
-            })
+            this.mapDataService.getMapData();
         }, 120_000);
     }
 
@@ -169,7 +175,10 @@ export class AdminMapComponent implements OnInit, ICanDeactivate {
                 next: () => {
                     this.changes = false;
                     this.toastr.success("Changes applied successfully!");
-                    this.mapDataService.getMapData().subscribe((data) => {
+                    this.mapDataService.getMapData()
+
+                    // once we apply changes, we want to update the old data (ONCE)
+                    this.mapDataService.mapData.pipe(take(1)).subscribe((data) => {
                         this.oldData = JSON.stringify(data);
                         this.mapData = data;
                         this.pinCategories = data.pins;
