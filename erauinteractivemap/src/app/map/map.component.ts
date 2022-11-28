@@ -84,9 +84,22 @@ export class MapComponent implements OnInit {
         map.on('click', () => {
             this.displayInfo = false;
             this.cdr.detectChanges();
-        })
+        });
         map.on('locationfound', (e) => {
             const loc = this.translateRealToMap(e.latlng);
+
+            // if the user is outside the map, then remove the marker and radius
+            if (!this.imageBounds.contains(loc)) {
+                this.userLocation?.remove();
+                this.userLocationRadius?.remove();
+                this.userLocation = undefined;
+                this.userLocationRadius = undefined;
+                this.toastr.error('You are outside the map bounds. Please use the locate button once you are on campus.');
+                this.map?.stopLocate();
+                return;
+            }
+
+            // if the user is inside the map, then either create the marker and radius or update the position of the existing ones
             if (this.userLocation) {
                 this.userLocation.setLatLng(loc);
                 this.userLocationRadius?.setLatLng(loc);
@@ -95,6 +108,7 @@ export class MapComponent implements OnInit {
                 this.userLocationRadius = L.circle(loc, {
                     radius: e.accuracy,
                 }).addTo(map);
+                this.map?.setZoomAround(loc, 18);
             }
         });
         map.on('locationerror', (e: L.ErrorEvent) => {
@@ -162,6 +176,7 @@ export class MapComponent implements OnInit {
             this.infoDisplayObject = building;
             this.displayInfo = true;
             this.cdr.detectChanges();
+            this.map?.setZoomAround(e.latlng, 18);
         });
     }
 
@@ -172,6 +187,7 @@ export class MapComponent implements OnInit {
             this.infoDisplayObject = child;
             this.displayInfo = true;
             this.cdr.detectChanges();
+            this.map?.setZoomAround(e.latlng, 18);
         });
     }
 }

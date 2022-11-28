@@ -1,10 +1,11 @@
-import { Component, EmbeddedViewRef, HostListener, OnInit, TemplateRef, ViewChild, ViewContainerRef } from '@angular/core';
+import { ChangeDetectorRef, Component, EmbeddedViewRef, HostListener, OnInit, TemplateRef, ViewChild, ViewContainerRef } from '@angular/core';
 import { MatRadioChange } from '@angular/material/radio';
 import * as L from 'leaflet';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs';
 import { BuildingPropertyName } from 'shared/enums/database-schema.enum';
 import { Building, BuildingChild, DatabaseSchema, Pin } from 'shared/models/database-schema.model';
+import { DeleteBuildingPropertyRequest } from 'shared/models/update-request.model';
 import { ICanDeactivate } from 'src/app/_interfaces/ICanDeactivate.interface';
 import { AdminService } from 'src/app/_services/admin.service';
 import { MapDataService } from 'src/app/_services/map-data.service';
@@ -16,7 +17,7 @@ import { MapDataService } from 'src/app/_services/map-data.service';
     styleUrls: ['./admin-map.component.scss'],
 })
 export class AdminMapComponent implements OnInit, ICanDeactivate {
-    constructor(private mapDataService: MapDataService, private adminService: AdminService, private toastr: ToastrService, private viewRef: ViewContainerRef) { }
+    constructor(private mapDataService: MapDataService, private adminService: AdminService, private toastr: ToastrService, private viewRef: ViewContainerRef, private cdr: ChangeDetectorRef) { }
 
     public readonly realBounds: L.LatLngBounds = new L.LatLngBounds([
         [29.185670171901748, -81.05683016856118],
@@ -32,6 +33,9 @@ export class AdminMapComponent implements OnInit, ICanDeactivate {
     private oldData?: string; // this is ONLY to keep track of whether there are new changes in the database
     private mapData?: DatabaseSchema;
     changes: boolean = false;
+
+    displayInfo: boolean = false;
+    infoDisplayObject?: Building | BuildingChild;
 
     modalRadioValue: 'building' | 'child' | '' = '';
     pinCategories: Pin[] = [];
@@ -185,7 +189,7 @@ export class AdminMapComponent implements OnInit, ICanDeactivate {
     }
 
     applyChanges() {
-        if (this.mapData && this.changes) {
+        if (this.mapData) {
             console.log("Applying changes")
             this.adminService.applyChanges(this.mapData).subscribe({
                 next: () => {
@@ -280,6 +284,7 @@ export class AdminMapComponent implements OnInit, ICanDeactivate {
         }).subscribe({
             next: (data) => {
                 let newChild: BuildingChild = {
+                    _parent: this.childAddForm.building as any,
                     _id: data.id,
                     name: this.childAddForm.name,
                     description: this.childAddForm.description,
@@ -344,6 +349,13 @@ export class AdminMapComponent implements OnInit, ICanDeactivate {
                 this.toastr.error("Error updating building location");
             }
         });
+
+        marker.on('click', (e: L.LeafletMouseEvent) => {
+            this.infoDisplayObject = building;
+            this.displayInfo = true;
+            this.cdr.detectChanges();
+            this.map?.setZoomAround(e.latlng, 18);
+        });
     }
 
     private createChildMarker(child: BuildingChild) {
@@ -362,6 +374,43 @@ export class AdminMapComponent implements OnInit, ICanDeactivate {
                 this.toastr.error("Error updating child location");
             }
         });
+
+        marker.on('click', (e: L.LeafletMouseEvent) => {
+            this.infoDisplayObject = child;
+            this.displayInfo = true;
+            this.cdr.detectChanges();
+            this.map?.setZoomAround(e.latlng, 18);
+        });
+    }
+
+    deleteMarker(marker: Building | BuildingChild): void {
+        if (!marker._id) {
+            this.toastr.error("Error deleting marker: no id");
+            return;
+        }
+
+        if (marker.hasOwnProperty('children')) {
+            this.toastr.error("Cannot delete buildings from the map! Need to do it directly in the database.");
+            return;
+        }
+
+        this.deleteChild(marker as BuildingChild);
+    }
+
+    private deleteChild(marker: BuildingChild) {
+        this.adminService.deleteBuildingProperty(new DeleteBuildingPropertyRequest(marker._parent, marker._id)).subscribe({
+            next: (data) => {
+                // remove from map data
+                marker = marker as BuildingChild;
+                let building = this.mapData?.buildings.find(b => b._id.toString() === marker._parent.toString());
+                if (building) {
+                    building.children = building.children.filter(c => c._id.toString() !== marker._id.toString());
+                }
+
+                this.toastr.success("Successfully deleted child");
+            }
+        });
+
     }
 
     // translate a real world lat/lng to a map lat/lng (in pixels from bottom left)

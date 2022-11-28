@@ -22,6 +22,7 @@ import { ToastrModule } from 'ngx-toastr';
 import { NgMultiSelectDropDownModule } from 'ng-multiselect-dropdown';
 import { MatIconModule } from '@angular/material/icon';
 import { InfoDisplayComponent } from './_shared/info-display/info-display.component';
+import { ContenteditableModelDirective } from './_directives/contenteditable-model.directive';
 
 
 
@@ -30,7 +31,7 @@ export function tokenGetter() {
 }
 
 @NgModule({
-    declarations: [AppComponent, MapComponent, AdminLoginComponent, AdminEditComponent, AdminMapComponent, InfoDisplayComponent],
+    declarations: [AppComponent, MapComponent, AdminLoginComponent, AdminEditComponent, AdminMapComponent, InfoDisplayComponent, ContenteditableModelDirective],
     imports: [
         BrowserModule,
         AppRoutingModule,

@@ -1,9 +1,57 @@
 <div class="p-3 w-full h-full">
-    <div *ngIf="!editable" class="flex flex-col">
-        <h1>{{ markerData?.name }}</h1>
+    <div class="flex flex-col" *ngIf="!editable">
+        <h1 class="text-2xl font-bold">
+            {{ markerData?.name }}
+        </h1>
+        <!-- divider line -->
+        <div class="w-full h-1 bg-gray-300 my-2"></div>
+        <div class="flex p-2">
+            <!-- directions button -->
+            <button
+                mat-raised-button
+                color="primary"
+                class="w-full"
+                (click)="onDirections()"
+            >
+                Directions
+            </button>
+        </div>
+        <div class="w-full h-1 bg-gray-300 my-2"></div>
         <p>{{ markerData?.description }}</p>
     </div>
-    <div *ngIf="editable" class="flex flex-col">
-        <form></form>
+    <div class="flex flex-col" *ngIf="editable">
+        <h1
+            class="text-2xl font-bold"
+            contenteditable
+            [(appContenteditableModel)]="markerData!.name"
+        ></h1>
+        <!-- divider line -->
+        <div class="w-full h-1 bg-gray-300 my-2"></div>
+        <div class="flex p-2">
+            <!-- directions button -->
+            <button
+                mat-raised-button
+                color="primary"
+                class="w-full"
+                (click)="onDirections()"
+            >
+                Directions
+            </button>
+        </div>
+        <div class="w-full h-1 bg-gray-300 my-2"></div>
+        <p contenteditable [(appContenteditableModel)]="markerData!.description"></p>
+
+        <div class="w-full h-2 bg-gray-600 mt-5 mb-2"></div>
+        <!-- delete button -->
+        <div class="flex p-2">
+            <button
+                mat-raised-button
+                color="warn"
+                class="w-full"
+                (click)="onDelete()"
+            >
+                Delete
+            </button>
+        </div>
     </div>
 </div>
