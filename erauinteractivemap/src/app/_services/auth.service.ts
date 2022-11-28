@@ -1,4 +1,8 @@
-import { HttpClient, HttpErrorResponse, HttpResponse } from '@angular/common/http';
+import {
+    HttpClient,
+    HttpErrorResponse,
+    HttpResponse,
+} from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { JwtHelperService } from '@auth0/angular-jwt';
@@ -12,7 +16,7 @@ export class AuthService {
     login(username: string, password: string): Observable<boolean> {
         return new Observable<boolean>((observer) => {
             if (this.isAuthenticated()) {
-                observer.error("User is already logged in.");
+                observer.error('User is already logged in.');
                 observer.complete();
             }
 
@@ -24,7 +28,10 @@ export class AuthService {
                 .subscribe({
                     next: (response: any) => {
                         if (response.token) {
-                            localStorage.setItem('token', response.token);
+                            localStorage.setItem(
+                                'access_token',
+                                response.token
+                            );
                             observer.next(true);
                         } else {
                             observer.next(false);
@@ -41,7 +48,7 @@ export class AuthService {
 
     isAuthenticated(): boolean {
         // if local storage has a non-expired token, return true
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('access_token');
         const helper = new JwtHelperService();
 
         if (token && !helper.isTokenExpired(token)) {

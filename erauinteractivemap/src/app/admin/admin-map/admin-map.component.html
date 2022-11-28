@@ -1,1 +1,300 @@
-<p>admin-map works!</p>
+<div
+    class="main-map"
+    leaflet
+    [leafletOptions]="options"
+    [leafletFitBounds]="imageBounds"
+    (leafletMapReady)="onMapReady($event)"
+></div>
+
+<!-- UI on top of map -->
+<div class="absolute top-0 left-0 z-30 w-full h-full pointer-events-none">
+    <div class="flex flex-col justify-between h-full">
+        <div class="flex flex-row justify-between">
+            <div class="flex flex-col">
+                <div>
+                    <button
+                        (click)="addMarkerToMap()"
+                        class="pointer-events-auto bg-white border drop-shadow-lg rounded-md p-2 m-2 border-black hover:bg-gray-200"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke-width="1.5"
+                            stroke="currentColor"
+                            class="w-12 h-12"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                        </svg>
+                    </button>
+                    <button
+                        (click)="openPinEdit()"
+                        class="pointer-events-auto bg-white border drop-shadow-lg rounded-md p-2 m-2 border-black hover:bg-gray-200"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke-width="1.5"
+                            stroke="currentColor"
+                            class="w-6 h-6"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"
+                            />
+                        </svg>
+                    </button>
+                </div>
+                <div>
+                    <div
+                        class="pointer-events-auto m-4 ml-0 rounded-l-none rounded-md bg-white transition-transform p-3 displayInfo"
+                        style="width: 16rem"
+                        [hidden]="!displayInfo"
+                    >
+                        <app-info-display
+                            #infoDisplay
+                            [markerData]="infoDisplayObject"
+                            [editable]="true"
+                            (deleteMarker)="deleteMarker($event)"
+                        ></app-info-display>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <!-- upper right -->
+            </div>
+        </div>
+        <div class="flex flex-row justify-between items-end">
+            <div>
+                <!-- lower left -->
+            </div>
+            <div>
+                <!-- lower right -->
+                <!-- apply changes button -->
+                <!-- [disabled]="!changes" -->
+                <button
+                    (click)="applyChanges()"
+                    class="pointer-events-auto bg-white border drop-shadow-lg rounded-md p-2 m-2 border-black hover:bg-gray-200"
+                >
+                    Apply Changes (PLEASE BE SURE)
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- modal template -->
+<ng-template #modalFormTemplate>
+    <div class="absolute w-full h-full bg-opacity-50 bg-black z-50">
+        <!-- centered on screen -->
+        <div class="bg-white rounded-md w-96 p-4 mx-auto mt-16">
+            <div class="flex flex-col">
+                <div class="ml-80">
+                    <svg
+                        (click)="closeModal()"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="1.5"
+                        stroke="currentColor"
+                        class="w-8 h-8 p-1 rounded-md bg-black bg-opacity-5 hover:bg-opacity-30 hover:cursor-pointer"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M6 18L18 6M6 6l12 12"
+                        />
+                    </svg>
+                </div>
+
+                <mat-radio-group
+                    (change)="radioChange($event)"
+                    class="flex flex-col space-y-2"
+                >
+                    <mat-radio-button value="building"
+                        >Building</mat-radio-button
+                    >
+                    <mat-radio-button value="child"
+                        >Building Child</mat-radio-button
+                    >
+                </mat-radio-group>
+
+                <div class="h-4"></div>
+
+                <div *ngIf="modalRadioValue === 'building'">
+                    <form
+                        (ngSubmit)="onSubmitAddBuilding()"
+                        #addForm="ngForm"
+                        class="flex flex-col space-y-1"
+                    >
+                        <mat-form-field>
+                            <mat-label>Name</mat-label>
+                            <input
+                                matInput
+                                type="text"
+                                name="name"
+                                [(ngModel)]="buildingAddForm.name"
+                                required
+                            />
+                        </mat-form-field>
+
+                        <mat-form-field>
+                            <mat-label>Description</mat-label>
+                            <textarea
+                                matInput
+                                type="text"
+                                name="description"
+                                [(ngModel)]="buildingAddForm.description"
+                                required
+                            ></textarea>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline">
+                            <mat-label>Pin Category</mat-label>
+                            <mat-select
+                                name="category"
+                                [(ngModel)]="buildingAddForm.category"
+                                required
+                            >
+                                <mat-option
+                                    *ngFor="let pin of pinCategories"
+                                    [value]="pin._id"
+                                >
+                                    {{ pin.category }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+
+                        <button
+                            mat-raised-button
+                            color="primary"
+                            type="submit"
+                            [disabled]="addForm.invalid"
+                        >
+                            Create (YOU CANNOT DELETE THIS)
+                        </button>
+                    </form>
+                </div>
+
+                <div *ngIf="modalRadioValue === 'child'">
+                    <form
+                        (ngSubmit)="onSubmitAddChild()"
+                        #addForm="ngForm"
+                        class="flex flex-col space-y-1"
+                    >
+                        <mat-form-field appearance="outline">
+                            <mat-select
+                                name="building"
+                                [(ngModel)]="childAddForm.building"
+                                required
+                            >
+                                <mat-option
+                                    *ngFor="let building of buildings"
+                                    [value]="building._id"
+                                >
+                                    {{ building.name }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+
+                        <mat-form-field>
+                            <mat-label>Name</mat-label>
+                            <input
+                                matInput
+                                type="text"
+                                name="name"
+                                [(ngModel)]="childAddForm.name"
+                                required
+                            />
+                        </mat-form-field>
+
+                        <mat-form-field>
+                            <mat-label
+                                >Type (entrances, bathrooms, etc)</mat-label
+                            >
+                            <mat-select
+                                name="type"
+                                [(ngModel)]="childAddForm.type"
+                            >
+                                <mat-option [value]="">None</mat-option>
+                                <mat-option
+                                    *ngFor="let name of childTypeEnum"
+                                    [value]="name"
+                                    >{{ name }}</mat-option
+                                >
+                            </mat-select>
+                        </mat-form-field>
+
+                        <mat-form-field>
+                            <mat-label>Description</mat-label>
+                            <textarea
+                                matInput
+                                type="text"
+                                name="description"
+                                [(ngModel)]="childAddForm.description"
+                                required
+                            ></textarea>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline">
+                            <mat-label>Pin Category</mat-label>
+                            <mat-select
+                                name="category"
+                                [(ngModel)]="childAddForm.category"
+                                required
+                            >
+                                <mat-option
+                                    *ngFor="let pin of pinCategories"
+                                    [value]="pin._id"
+                                >
+                                    {{ pin.category }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+
+                        <button
+                            mat-raised-button
+                            color="primary"
+                            type="submit"
+                            [disabled]="addForm.invalid"
+                        >
+                            Create
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #editModalTemplate>
+    <div class="absolute w-full h-full bg-opacity-50 bg-black z-50">
+        <!-- centered on screen -->
+        <div class="bg-white rounded-md p-4 mx-auto mt-16 flex flex-col">
+            <div class="m-auto pl-80">
+                <svg
+                    (click)="closeModal()"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="1.5"
+                    stroke="currentColor"
+                    class="w-8 h-8 p-1 rounded-md bg-black bg-opacity-5 hover:bg-opacity-30 hover:cursor-pointer"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M6 18L18 6M6 6l12 12"
+                    />
+                </svg>
+            </div>
+            <app-admin-edit></app-admin-edit>
+        </div>
+    </div>
+</ng-template>

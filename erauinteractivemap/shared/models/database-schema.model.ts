@@ -1,4 +1,5 @@
 import * as Realm from 'realm-web';
+import { BuildingPropertyName } from 'shared/enums/database-schema.enum';
 
 export interface DatabaseSchema {
     buildings: Building[];
@@ -11,11 +12,6 @@ export interface Building extends globalThis.Realm.Services.MongoDB.Document {
     description: string;
     location: PointLocation;
     category: Realm.BSON.ObjectId;
-    entrances: Entrance[];
-    restrooms: Restroom[];
-    maternity: Maternity[];
-    emergency: Emergency[];
-    vending: Vending[];
     children: BuildingChild[];
 }
 
@@ -24,27 +20,14 @@ export interface PointLocation {
     lng: number;
 }
 
-export interface BuildingProperty {
+export interface BuildingChild {
+    _parent: Realm.BSON.ObjectId;
     _id: Realm.BSON.ObjectId;
+    type: BuildingPropertyName | undefined;
+    name: string;
+    description: string;
     location: PointLocation;
     category: Realm.BSON.ObjectId;
-    comment: string;
-}
-
-export interface Entrance extends BuildingProperty {
-    accessibility: boolean;
-}
-
-export interface Restroom extends BuildingProperty {}
-
-export interface Maternity extends BuildingProperty {}
-
-export interface Vending extends BuildingProperty {}
-
-export interface Emergency extends BuildingProperty {}
-
-export interface BuildingChild extends BuildingProperty {
-    name: string;
 }
 
 export interface Pin extends globalThis.Realm.Services.MongoDB.Document {

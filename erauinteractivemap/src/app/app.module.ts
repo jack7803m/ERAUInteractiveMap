@@ -14,10 +14,15 @@ import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatRadioModule } from '@angular/material/radio';
 import { AdminEditComponent } from './admin/admin-edit/admin-edit.component';
 import { AdminMapComponent } from './admin/admin-map/admin-map.component';
+import { ToastrModule } from 'ngx-toastr';
 import { NgMultiSelectDropDownModule } from 'ng-multiselect-dropdown';
 import { MatIconModule } from '@angular/material/icon';
+import { InfoDisplayComponent } from './_shared/info-display/info-display.component';
+import { ContenteditableModelDirective } from './_directives/contenteditable-model.directive';
 
 
 
@@ -26,7 +31,7 @@ export function tokenGetter() {
 }
 
 @NgModule({
-    declarations: [AppComponent, MapComponent, AdminLoginComponent, AdminEditComponent, AdminMapComponent],
+    declarations: [AppComponent, MapComponent, AdminLoginComponent, AdminEditComponent, AdminMapComponent, InfoDisplayComponent, ContenteditableModelDirective],
     imports: [
         BrowserModule,
         AppRoutingModule,
@@ -38,17 +43,20 @@ export function tokenGetter() {
                 allowedDomains: [
                     'localhost:4200',
                     'erauinteractivemap.pages.dev',
+                    new RegExp('^.*\.erauinteractivemap\.pages\.dev$'),
                 ],
             },
         }),
         BrowserAnimationsModule,
+        ToastrModule.forRoot(),
         MatCardModule,
         FormsModule,
         MatButtonModule,
         MatFormFieldModule,
         MatButtonModule,
         MatInputModule,
-        MatFormFieldModule,
+        MatSelectModule,
+        MatRadioModule,
         NgMultiSelectDropDownModule,
         MatIconModule
     ],

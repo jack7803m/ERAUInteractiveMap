@@ -1,7 +1,4 @@
-import {
-    CreatePinCategoryRequest,
-    UpdatePinCategoryRequest,
-} from 'shared/models/update-request.model';
+import { CreatePinCategoryRequest, UpdatePinCategoryRequest } from 'shared/models/update-request.model';
 
 export async function onRequestPost(context: any): Promise<Response> {
     const { request, env, params, waitUntil, next, data } = context;
@@ -30,9 +27,7 @@ export async function onRequestPut(context: any): Promise<Response> {
     const updatePinRequest = (await request.json()) as UpdatePinCategoryRequest;
 
     await db.collection('pins').updateOne(
-        {
-            _id: { $oid: updatePinRequest.id },
-        },
+        { _id: { $oid: updatePinRequest.id } },
         {
             $set: {
                 category: updatePinRequest.category,

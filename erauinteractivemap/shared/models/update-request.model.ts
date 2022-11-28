@@ -1,6 +1,5 @@
 import * as Realm from 'realm-web';
-import { BuildingPropertyName } from 'shared/enums/database-schema.enum';
-import { BuildingProperty, PointLocation } from './database-schema.model';
+import { BuildingChild, DatabaseSchema, PointLocation } from './database-schema.model';
 
 export class CreateBuildingRequest {
     name: string;
@@ -21,75 +20,34 @@ export class CreateBuildingRequest {
     }
 }
 
-export class UpdateBuildingRequest {
-    buildingId: Realm.BSON.ObjectId;
-    name: string;
-    description: string;
-    location: PointLocation;
-    category: Realm.BSON.ObjectId;
-
-    public constructor(
-        buildingId: Realm.BSON.ObjectId,
-        name: string,
-        description: string,
-        location: PointLocation,
-        category: Realm.BSON.ObjectId
-    ) {
-        this.buildingId = buildingId;
-        this.name = name;
-        this.description = description;
-        this.location = location;
-        this.category = category;
-    }
-}
-
 export class CreateBuildingPropertyRequest {
     buildingId: Realm.BSON.ObjectId;
-    propertyName: BuildingPropertyName;
-    propertyData: BuildingProperty;
+    propertyData: {
+        name: string;
+        description: string;
+        type: string;
+        category: Realm.BSON.ObjectId;
+        location: PointLocation;
+    };
 
     public constructor(
         buildingId: Realm.BSON.ObjectId,
-        property: BuildingPropertyName,
-        propertyData: BuildingProperty
+        propertyData: any
     ) {
         this.buildingId = buildingId;
-        this.propertyName = property;
-        this.propertyData = propertyData;
-    }
-}
-
-export class UpdateBuildingPropertyRequest {
-    buildingId: Realm.BSON.ObjectId;
-    propertyName: BuildingPropertyName;
-    propertyId: Realm.BSON.ObjectId;
-    propertyData: BuildingProperty;
-
-    public constructor(
-        buildingId: Realm.BSON.ObjectId,
-        propertyName: BuildingPropertyName,
-        propertyId: Realm.BSON.ObjectId,
-        propertyData: BuildingProperty
-    ) {
-        this.buildingId = buildingId;
-        this.propertyName = propertyName;
-        this.propertyId = propertyId;
         this.propertyData = propertyData;
     }
 }
 
 export class DeleteBuildingPropertyRequest {
     buildingId: Realm.BSON.ObjectId;
-    propertyName: BuildingPropertyName;
     propertyId: Realm.BSON.ObjectId;
 
     public constructor(
         buildingId: Realm.BSON.ObjectId,
-        propertyName: BuildingPropertyName,
         propertyId: Realm.BSON.ObjectId
     ) {
         this.buildingId = buildingId;
-        this.propertyName = propertyName;
         this.propertyId = propertyId;
     }
 }
@@ -112,12 +70,7 @@ export class UpdatePinCategoryRequest {
     color: string;
     icon: string;
 
-    constructor(
-        id: Realm.BSON.ObjectId,
-        category: string,
-        color: string,
-        icon: string
-    ) {
+    public constructor(id: Realm.BSON.ObjectId, category: string, color: string, icon: string) {
         this.id = id;
         this.category = category;
         this.color = color;

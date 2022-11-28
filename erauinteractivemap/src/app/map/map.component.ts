@@ -1,6 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import * as L from 'leaflet';
+import { ToastrService } from 'ngx-toastr';
+import { MapDataService } from '../_services/map-data.service';
 import { IDropdownSettings } from 'ng-multiselect-dropdown';
+import { Building, BuildingChild, DatabaseSchema, Pin } from 'shared/models/database-schema.model';
+import { InfoDisplayComponent } from '../_shared/info-display/info-display.component';
 
 @Component({
     selector: 'app-map',
@@ -8,46 +12,7 @@ import { IDropdownSettings } from 'ng-multiselect-dropdown';
     styleUrls: ['./map.component.scss'],
 })
 export class MapComponent implements OnInit {
-    toggleS: boolean = false;
-    toggleW: boolean = true;
-    toggleM: boolean = true;
-    searchText: string = '';
-    testData = [
-        { item_id: '16', item_name: 'Campus Safety' },
-        { item_id: '17', item_name: 'Parking Garage' },
-        { item_id: '18', item_name: 'Library' },
-        { item_id: '19', item_name: 'Book Store' },
-        { item_id: '1', item_name: 'Gym' },
-        { item_id: '3', item_name: 'COE' },
-        { item_id: '4', item_name: 'COAS' },
-        { item_id: '5', item_name: 'COA' },
-        { item_id: '6', item_name: 'COB' },
-        { item_id: '11', item_name: 'Vending Near Me' },
-        { item_id: '12', item_name: 'Nearest Restroom' },
-        { item_id: '13', item_name: 'Student Union' },
-        { item_id: '14', item_name: 'New Res One' },
-        { item_id: '15', item_name: 'Post Office' },
-    ];
-
-    selectedItems = [
-        { item_id: '10', item_name: 'Campus Search' },
-    ];
-    //ALLOW FOR THE ITEMS TO BE SELECTED
-    dropDownSettings: IDropdownSettings = {
-        singleSelection: true,
-        idField: 'item_id',
-        textField: 'item_name',
-        itemsShowLimit: 10,
-        allowSearchFilter: true,
-        closeDropDownOnSelection: true,
-        unSelectAllText: 'Campus Search',
-    };
-
-    constructor() {
-    }
-
-    // the bounds of the map in real world coordinates
-    private map?: L.Map;
+    constructor(private toastr: ToastrService, private mapDataService: MapDataService, private cdr: ChangeDetectorRef) { }
 
     public readonly realBounds: L.LatLngBounds = new L.LatLngBounds([
         [29.185670171901730, -81.05683016856100],
@@ -59,15 +24,23 @@ export class MapComponent implements OnInit {
         [1700, 1568],
     ]);
 
+    private map?: L.Map;
+
+    @ViewChild('infoDisplay') infoDisplay?: InfoDisplayComponent;
+
     userLocation?: L.Marker;
     userLocationRadius?: L.Circle;
 
-    mapPng: L.Layer = L.imageOverlay('assets/images/vectorymappyNowalk.svg', this.realBounds);
-    walkPng: L.Layer = L.imageOverlay('assets/images/walky.svg', this.realBounds);
+    mapPng: L.Layer = L.imageOverlay('assets/images/campus-map-trans.png', this.imageBounds);
+    walkPng: L.Layer = L.imageOverlay('assets/images/campus-map-walkable-trans.png', this.imageBounds);
     satelite: L.Layer = L.tileLayer('https://{s}.tile.openstreetmap.de/{z}/{x}/{y}.png');
 
+    mapData?: DatabaseSchema;
+    pinCategories?: Pin[];
+    buildings?: Building[];
 
-
+    infoDisplayObject?: Building | BuildingChild;
+    displayInfo: boolean = false;
 
     public options: L.MapOptions = {
         layers: [
@@ -76,8 +49,13 @@ export class MapComponent implements OnInit {
         ],
         zoom: 17,
         zoomSnap: 0,
-        zoomControl: false,
+        crs: L.CRS.Simple,
+        minZoom: -0.81,
+        maxZoom: 2,
+        maxBounds: this.imageBounds,
+        maxBoundsViscosity: 0.95,
         attributionControl: false,
+        zoomControl: false,
     };
 
 
@@ -87,9 +65,41 @@ export class MapComponent implements OnInit {
     // do all configuration here that is not done in the template/options
     // this basically includes 'subscribing' to map events with map.on()
     onMapReady(map: L.Map) {
+        this.mapDataService.getMapData();
+
+        this.mapDataService.mapData.subscribe((data) => {
+            this.mapData = data;
+            this.pinCategories = data.pins;
+            this.buildings = data.buildings;
+
+            data.buildings.forEach(building => {
+                this.createBuildingMarker(building);
+                building.children.forEach(child => {
+                    this.createChildMarker(child);
+                })
+            })
+        })
+
         this.map = map;
+        map.on('click', () => {
+            this.displayInfo = false;
+            this.cdr.detectChanges();
+        });
         map.on('locationfound', (e) => {
             const loc = this.translateRealToMap(e.latlng);
+
+            // if the user is outside the map, then remove the marker and radius
+            if (!this.imageBounds.contains(loc)) {
+                this.userLocation?.remove();
+                this.userLocationRadius?.remove();
+                this.userLocation = undefined;
+                this.userLocationRadius = undefined;
+                this.toastr.error('You are outside the map bounds. Please use the locate button once you are on campus.');
+                this.map?.stopLocate();
+                return;
+            }
+
+            // if the user is inside the map, then either create the marker and radius or update the position of the existing ones
             if (this.userLocation) {
                 this.userLocation.setLatLng(loc);
                 this.userLocationRadius?.setLatLng(loc);
@@ -98,18 +108,12 @@ export class MapComponent implements OnInit {
                 this.userLocationRadius = L.circle(loc, {
                     radius: e.accuracy,
                 }).addTo(map);
+                this.map?.setZoomAround(loc, 18);
             }
         });
         map.on('locationerror', (e: L.ErrorEvent) => {
-            // TODO: better error handling
-            alert(e.message + e.code);
+            this.toastr.error("Please enable location services to use this feature.", "Location Error");
             map.stopLocate();
-
-            // if high accuracy is not available, try again with low accuracy
-            // TODO: determine what the error code is if failed to get high accuracy
-            // if (e.code !== 1) {
-            //   map.locate({ enableHighAccuracy: false, watch: true });
-            //}
         });
 
         // make a border around the map using a rectangle
@@ -118,53 +122,26 @@ export class MapComponent implements OnInit {
             weight: 3,
             fill: false,
         }).addTo(map);
-
-        // high accuracy is ideal here because we want it to be as accurate as possible on the small section of map we have
-        // watch is true because we want to keep updating the location
-        map.locate({ enableHighAccuracy: true, watch: true });
-        map.fitBounds(this.realBounds);
-
     }
 
-
-    onMapClick(e: L.LeafletMouseEvent) {
-        console.log(e.latlng);
-    }
-
-    toggleSatelite() {
-        this.toggleS = !this.toggleS;
-        if (this.toggleS) {
-            this.map?.addLayer(this.satelite);
-            console.warn("Statlite is on");
-        } else {
-            this.map?.removeLayer(this.satelite);
-            console.warn("Statlite is off");
+    onMapLocate() {
+        if (!this.userLocation) {
+            // high accuracy is ideal here because we want it to be as accurate as possible on the small section of map we have
+            // watch is true because we want to keep updating the location
+            this.map?.locate({ enableHighAccuracy: true, watch: true });
         }
     }
 
-    toggleWalk() {
-        this.toggleW = !this.toggleW;
-        if (this.toggleW) {
-            this.map?.addLayer(this.walkPng);
-            console.warn("Walk is on");
-        } else {
-            this.map?.removeLayer(this.walkPng);
-            console.warn("Walk is off");
-        }
+    onZoomIn() {
+        this.map?.zoomIn();
     }
 
-    toggleMap() {
-        this.toggleM = !this.toggleM;
-        if (this.toggleM) {
-            this.map?.addLayer(this.mapPng);
-            console.warn("Map is on");
-        } else {
-            this.map?.removeLayer(this.mapPng);
-            console.warn("Map is off");
-        }
+    onZoomOut() {
+        this.map?.zoomOut();
     }
 
-    translateRealToMap(position: L.LatLng): L.LatLng {
+    // translate a real world lat/lng to a map lat/lng (in pixels from bottom left)
+    private translateRealToMap(position: L.LatLng): L.LatLng {
         // as long as this works, don't touch it :)
         const mapLeft = this.imageBounds.getWest();
         const mapBottom = this.imageBounds.getSouth();
@@ -192,11 +169,25 @@ export class MapComponent implements OnInit {
         console.log(ev);
     }
 
-    zoomIn() {
-        this.map?.zoomIn();
+    createBuildingMarker(building: Building) {
+        const marker = L.marker(building.location).addTo(this.map!);
+
+        marker.on('click', (e: L.LeafletMouseEvent) => {
+            this.infoDisplayObject = building;
+            this.displayInfo = true;
+            this.cdr.detectChanges();
+            this.map?.setZoomAround(e.latlng, 18);
+        });
     }
 
-    zoomOut() {
-        this.map?.zoomOut();
+    createChildMarker(child: BuildingChild) {
+        const marker = L.marker(child.location).addTo(this.map!);
+
+        marker.on('click', (e: L.LeafletMouseEvent) => {
+            this.infoDisplayObject = child;
+            this.displayInfo = true;
+            this.cdr.detectChanges();
+            this.map?.setZoomAround(e.latlng, 18);
+        });
     }
 }
