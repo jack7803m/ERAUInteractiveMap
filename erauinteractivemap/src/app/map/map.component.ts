@@ -6,6 +6,7 @@ import { IDropdownSettings } from 'ng-multiselect-dropdown';
 import { Building, BuildingChild, DatabaseSchema, Pin } from 'shared/models/database-schema.model';
 import { InfoDisplayComponent } from '../_shared/info-display/info-display.component';
 
+
 @Component({
     selector: 'app-map',
     templateUrl: './map.component.html',
@@ -31,8 +32,8 @@ export class MapComponent implements OnInit {
     userLocation?: L.Marker;
     userLocationRadius?: L.Circle;
 
-    mapPng: L.Layer = L.imageOverlay('assets/images/campus-map-trans.png', this.imageBounds);
-    walkPng: L.Layer = L.imageOverlay('assets/images/campus-map-walkable-trans.png', this.imageBounds);
+    mapPng: L.Layer = L.imageOverlay('assets/images/map.png', this.imageBounds);
+    //walkPng: L.Layer = L.imageOverlay('assets/images/campus-map-walkable-trans.png', this.imageBounds);
     satelite: L.Layer = L.tileLayer('https://{s}.tile.openstreetmap.de/{z}/{x}/{y}.png');
 
     mapData?: DatabaseSchema;
@@ -45,7 +46,7 @@ export class MapComponent implements OnInit {
     public options: L.MapOptions = {
         layers: [
             this.mapPng,
-            this.walkPng,
+            //this.walkPng,
         ],
         zoom: 17,
         zoomSnap: 0,
