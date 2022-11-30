@@ -14,35 +14,28 @@ import { InfoDisplayComponent } from '../_shared/info-display/info-display.compo
 })
 export class MapComponent implements OnInit {
     constructor(private toastr: ToastrService, private mapDataService: MapDataService, private cdr: ChangeDetectorRef) { }
+    @ViewChild('infoDisplay') infoDisplay?: InfoDisplayComponent;
+
 
     public readonly realBounds: L.LatLngBounds = new L.LatLngBounds([
         [29.185670171901730, -81.05683016856100],
         [29.198278013324596, -81.0435554037837],
     ]);
-
     public readonly imageBounds: L.LatLngBounds = new L.LatLngBounds([
         [0, 0],
         [1700, 1568],
     ]);
-
     private map?: L.Map;
-
-    @ViewChild('infoDisplay') infoDisplay?: InfoDisplayComponent;
-
     userLocation?: L.Marker;
     userLocationRadius?: L.Circle;
-
     mapPng: L.Layer = L.imageOverlay('assets/images/map.png', this.imageBounds);
     //walkPng: L.Layer = L.imageOverlay('assets/images/campus-map-walkable-trans.png', this.imageBounds);
     satelite: L.Layer = L.tileLayer('https://{s}.tile.openstreetmap.de/{z}/{x}/{y}.png');
-
     mapData?: DatabaseSchema;
     pinCategories?: Pin[];
     buildings?: Building[];
-
     infoDisplayObject?: Building | BuildingChild;
     displayInfo: boolean = false;
-
     public options: L.MapOptions = {
         layers: [
             this.mapPng,
@@ -59,6 +52,38 @@ export class MapComponent implements OnInit {
         zoomControl: false,
     };
 
+
+    public searchText: string = '';
+    testData = [
+        { item_id: '16', item_name: 'Campus Safety' },
+        { item_id: '17', item_name: 'Parking Garage' },
+        { item_id: '18', item_name: 'Library' },
+        { item_id: '19', item_name: 'Book Store' },
+        { item_id: '1', item_name: 'Gym' },
+        { item_id: '3', item_name: 'COE' },
+        { item_id: '4', item_name: 'COAS' },
+        { item_id: '5', item_name: 'COA' },
+        { item_id: '6', item_name: 'COB' },
+        { item_id: '11', item_name: 'Vending Near Me' },
+        { item_id: '12', item_name: 'Nearest Restroom' },
+        { item_id: '13', item_name: 'Student Union' },
+        { item_id: '14', item_name: 'New Res One' },
+        { item_id: '15', item_name: 'Post Office' },
+    ];
+
+    public selectedItems = [
+        { item_id: '10', item_name: 'Campus Search' },
+    ];
+    //ALLOW FOR THE ITEMS TO BE SELECTED
+    dropDownSettings: IDropdownSettings = {
+        singleSelection: true,
+        idField: 'item_id',
+        textField: 'item_name',
+        itemsShowLimit: 10,
+        allowSearchFilter: true,
+        closeDropDownOnSelection: true,
+        unSelectAllText: 'Campus Search',
+    };
 
 
     ngOnInit(): void { }

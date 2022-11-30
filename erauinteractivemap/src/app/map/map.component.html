@@ -1,83 +1,52 @@
-<div
-    class="main-map"
-    leaflet
-    [leafletOptions]="options"
-    [leafletFitBounds]="imageBounds"
-    (leafletMapReady)="onMapReady($event)"
-></div>
+<div class="search">
+    <ng-multiselect-dropdown style="width: 15vw;" [placeholder]="'Campus Search'" [settings]="dropDownSettings"
+        [data]="testData" [(ngModel)]="selectedItems" (onSelect)="onItemSelect($event)">
+    </ng-multiselect-dropdown>
+</div>
+
+<div class="main-map" leaflet [leafletOptions]="options" [leafletFitBounds]="imageBounds"
+    (leafletMapReady)="onMapReady($event)"></div>
 
 <!-- UI on top of map -->
 <div class="absolute top-0 left-0 z-50 w-full h-full pointer-events-none">
     <div class="flex flex-col justify-between h-full">
         <div class="flex flex-row justify-between">
             <div class="flex flex-col space-y-2">
-                <div
-                    class="flex flex-row space-x-1 scale-150 m-8 md:m-4 md:scale-100"
-                >
+                <div class="flex flex-row space-x-1 scale-150 m-8 md:m-4 md:scale-100">
+
                     <!-- upper left -->
                     <div class="pointer-events-auto flex flex-col">
-                        <button
-                            (click)="onZoomIn()"
-                            class="p-2 bg-white border border-gray-400 drop-shadow-lg rounded-t-md hover:bg-gray-200"
-                        >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 24 24"
-                                fill="currentColor"
-                                class="w-6 h-6"
-                            >
-                                <path
-                                    fill-rule="evenodd"
+                        <button (click)="onZoomIn()"
+                            class="p-2 bg-white border border-gray-400 drop-shadow-lg rounded-t-md hover:bg-gray-200">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                                class="w-6 h-6">
+                                <path fill-rule="evenodd"
                                     d="M10.5 3.75a6.75 6.75 0 100 13.5 6.75 6.75 0 000-13.5zM2.25 10.5a8.25 8.25 0 1114.59 5.28l4.69 4.69a.75.75 0 11-1.06 1.06l-4.69-4.69A8.25 8.25 0 012.25 10.5zm8.25-3.75a.75.75 0 01.75.75v2.25h2.25a.75.75 0 010 1.5h-2.25v2.25a.75.75 0 01-1.5 0v-2.25H7.5a.75.75 0 010-1.5h2.25V7.5a.75.75 0 01.75-.75z"
-                                    clip-rule="evenodd"
-                                />
+                                    clip-rule="evenodd" />
                             </svg>
                         </button>
-                        <button
-                            (click)="onZoomOut()"
-                            class="p-2 bg-white border border-gray-400 drop-shadow-lg rounded-b-md hover:bg-gray-200"
-                        >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 24 24"
-                                fill="currentColor"
-                                class="w-6 h-6"
-                            >
-                                <path
-                                    fill-rule="evenodd"
+                        <button (click)="onZoomOut()"
+                            class="p-2 bg-white border border-gray-400 drop-shadow-lg rounded-b-md hover:bg-gray-200">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                                class="w-6 h-6">
+                                <path fill-rule="evenodd"
                                     d="M10.5 3.75a6.75 6.75 0 100 13.5 6.75 6.75 0 000-13.5zM2.25 10.5a8.25 8.25 0 1114.59 5.28l4.69 4.69a.75.75 0 11-1.06 1.06l-4.69-4.69A8.25 8.25 0 012.25 10.5zm4.5 0a.75.75 0 01.75-.75h6a.75.75 0 010 1.5h-6a.75.75 0 01-.75-.75z"
-                                    clip-rule="evenodd"
-                                />
+                                    clip-rule="evenodd" />
                             </svg>
                         </button>
                     </div>
-                    <button
-                        (click)="onMapLocate()"
-                        class="pointer-events-auto p-3 bg-white rounded-md drop-shadow-lg hover:bg-gray-200 border border-gray-400"
-                    >
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 24 24"
-                            fill="currentColor"
-                            class="w-6 h-6"
-                        >
-                            <path
-                                fill-rule="evenodd"
+                    <button (click)="onMapLocate()"
+                        class="pointer-events-auto p-3 bg-white rounded-md drop-shadow-lg hover:bg-gray-200 border border-gray-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
+                            <path fill-rule="evenodd"
                                 d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 00-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z"
-                                clip-rule="evenodd"
-                            />
+                                clip-rule="evenodd" />
                         </svg>
                     </button>
                 </div>
-                <div
-                    class="pointer-events-auto m-4 ml-0 rounded-l-none rounded-md bg-white transition-transform p-3 displayInfo"
-                    style="width: 16rem;"
-                    [hidden]="!displayInfo"
-                >
-                    <app-info-display
-                        #infoDisplay
-                        [markerData]="infoDisplayObject"
-                    ></app-info-display>
+                <div class="pointer-events-auto m-4 ml-0 rounded-l-none rounded-md bg-white transition-transform p-3 displayInfo"
+                    style="width: 16rem;" [hidden]="!displayInfo">
+                    <app-info-display #infoDisplay [markerData]="infoDisplayObject"></app-info-display>
                 </div>
             </div>
             <div>
