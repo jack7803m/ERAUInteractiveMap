@@ -53,26 +53,12 @@ export class MapComponent implements OnInit {
     };
 
 
-    public searchText: string = '';
-    testData = [
-        { item_id: '16', item_name: 'Campus Safety' },
-        { item_id: '17', item_name: 'Parking Garage' },
-        { item_id: '18', item_name: 'Library' },
-        { item_id: '19', item_name: 'Book Store' },
-        { item_id: '1', item_name: 'Gym' },
-        { item_id: '3', item_name: 'COE' },
-        { item_id: '4', item_name: 'COAS' },
-        { item_id: '5', item_name: 'COA' },
-        { item_id: '6', item_name: 'COB' },
-        { item_id: '11', item_name: 'Vending Near Me' },
-        { item_id: '12', item_name: 'Nearest Restroom' },
-        { item_id: '13', item_name: 'Student Union' },
-        { item_id: '14', item_name: 'New Res One' },
-        { item_id: '15', item_name: 'Post Office' },
-    ];
+    // public searchText: string = '';
 
-    public selectedItems = [
-        { item_id: '10', item_name: 'Campus Search' },
+    testData: any = [];
+    dataSearch: any = [];
+    selectedItems = [
+        { item_id: 10, item_name: 'Campus Search' },
     ];
     //ALLOW FOR THE ITEMS TO BE SELECTED
     dropDownSettings: IDropdownSettings = {
@@ -82,11 +68,11 @@ export class MapComponent implements OnInit {
         itemsShowLimit: 10,
         allowSearchFilter: true,
         closeDropDownOnSelection: true,
-        unSelectAllText: 'Campus Search',
+        noDataAvailablePlaceholderText: 'No Data :(',
     };
 
-
-    ngOnInit(): void { }
+    ngOnInit(): void {
+    }
 
     // do all configuration here that is not done in the template/options
     // this basically includes 'subscribing' to map events with map.on()
@@ -97,11 +83,11 @@ export class MapComponent implements OnInit {
             this.mapData = data;
             this.pinCategories = data.pins;
             this.buildings = data.buildings;
-
             data.buildings.forEach(building => {
                 this.createBuildingMarker(building);
                 building.children.forEach(child => {
                     this.createChildMarker(child);
+                    this.populateSearchData(data);
                 })
             })
         })
@@ -215,5 +201,36 @@ export class MapComponent implements OnInit {
             this.cdr.detectChanges();
             this.map?.setZoomAround(e.latlng, 18);
         });
+    }
+
+    populateSearchData(data: any) {
+        data.buildings.forEach((building: Building) => {
+            this.dataSearch.push({ item_id: building._id, item_name: building.name });
+            building.children.forEach(child => {
+                this.dataSearch.push({ item_id: child._id, item_name: child.name });
+            })
+        })
+        console.log(this.dataSearch);
+        this.createTestData();
+    }
+
+    createTestData() {
+        this.testData = [
+            { item_id: 22, item_name: 'Campus Safety' },
+            { item_id: 223, item_name: 'Parking Garage' },
+            { item_id: 123, item_name: 'Library' },
+            { item_id: 999, item_name: 'Book Store' },
+            { item_id: '1', item_name: 'Gym' },
+            { item_id: '3', item_name: 'COE' },
+            { item_id: '4', item_name: 'COAS' },
+            { item_id: '5', item_name: 'COA' },
+            { item_id: '6', item_name: 'COB' },
+            { item_id: '11', item_name: 'Vending Near Me' },
+            { item_id: '12', item_name: 'Nearest Restroom' },
+            { item_id: '13', item_name: 'Student Union' },
+            { item_id: '14', item_name: 'New Res One' },
+            { item_id: '15', item_name: 'Post Office' },
+        ];
+        console.log(this.testData);
     }
 }
