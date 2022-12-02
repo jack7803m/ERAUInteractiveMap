@@ -57,7 +57,7 @@ export function tokenGetter() {
         MatInputModule,
         MatSelectModule,
         MatRadioModule,
-        NgMultiSelectDropDownModule,
+        NgMultiSelectDropDownModule.forRoot(),
         MatIconModule
     ],
     providers: [],
