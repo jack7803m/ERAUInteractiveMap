@@ -178,7 +178,7 @@ export class MapComponent implements OnInit {
         marker.setIcon(L.icon({
             iconUrl: 'assets/pins/' + icon,
             iconSize: [25, 25],
-            iconAnchor: [10, 10],
+            iconAnchor: [12.5, 12.5],
         }));
 
         marker.on('click', (e: L.LeafletMouseEvent) => {
@@ -197,7 +197,7 @@ export class MapComponent implements OnInit {
         marker.setIcon(L.icon({
             iconUrl: 'assets/pins/' + icon,
             iconSize: [25, 25],
-            iconAnchor: [10, 10],
+            iconAnchor: [12.5, 12.5],
         }));
 
         marker.on('click', (e: L.LeafletMouseEvent) => {
