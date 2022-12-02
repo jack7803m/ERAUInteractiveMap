@@ -3,7 +3,7 @@ import * as L from 'leaflet';
 import { ToastrService } from 'ngx-toastr';
 import { MapDataService } from '../_services/map-data.service';
 import { IDropdownSettings } from 'ng-multiselect-dropdown';
-import { Building, BuildingChild, DatabaseSchema, Pin } from 'shared/models/database-schema.model';
+import { Building, BuildingChild, DatabaseSchema, Pin, PointLocation } from 'shared/models/database-schema.model';
 import { InfoDisplayComponent } from '../_shared/info-display/info-display.component';
 
 
@@ -53,14 +53,11 @@ export class MapComponent implements OnInit {
     };
 
 
-    // public searchText: string = '';
-
-    testData: { item_id: any, item_name: string }[] = [];
     dataSearch: { item_id: any, item_name: string }[] = [];
+    // ALLOW FOR THE ITEMS TO BE SELECTED
     selectedItems = [
-        { item_id: 10, item_name: 'Campus Search' },
+        { item_id: "", item_name: 'Campus Search' },
     ];
-    //ALLOW FOR THE ITEMS TO BE SELECTED
     dropDownSettings: IDropdownSettings = {
         singleSelection: true,
         idField: 'item_id',
@@ -178,17 +175,26 @@ export class MapComponent implements OnInit {
     }
 
     onItemSelect(ev: any) {
-        console.log(ev);
+        let b = this.buildings?.find(building => building._id === ev.item_id);
+        if (b) {
+            this.onClick(b);
+            return;
+        }
+
+        this.buildings?.forEach(building => {
+            let c = building.children.find(child => child._id === ev.item_id);
+            if (c) {
+                this.onClick(c);
+                return;
+            }
+        })
     }
 
     createBuildingMarker(building: Building) {
         const marker = L.marker(building.location).addTo(this.map!);
 
         marker.on('click', (e: L.LeafletMouseEvent) => {
-            this.infoDisplayObject = building;
-            this.displayInfo = true;
-            this.cdr.detectChanges();
-            this.map?.setZoomAround(e.latlng, 18);
+            this.onClick(building);
         });
     }
 
@@ -196,11 +202,15 @@ export class MapComponent implements OnInit {
         const marker = L.marker(child.location).addTo(this.map!);
 
         marker.on('click', (e: L.LeafletMouseEvent) => {
-            this.infoDisplayObject = child;
-            this.displayInfo = true;
-            this.cdr.detectChanges();
-            this.map?.setZoomAround(e.latlng, 18);
+            this.onClick(child);
         });
+    }
+
+    onClick(b: Building | BuildingChild) {
+        this.infoDisplayObject = b;
+        this.displayInfo = true;
+        this.cdr.detectChanges();
+        this.map?.setZoomAround(this.pointToLatLng(b.location), 18);
     }
 
     populateSearchData(data: any) {
@@ -213,34 +223,11 @@ export class MapComponent implements OnInit {
                 this.dataSearch[i] = { item_id: child._id, item_name: child.name };
             })
         })
-        // data.buildings.forEach((building: Building) => {
-        //     this.dataSearch.push({ item_id: building._id, item_name: building.name });
-        //     building.children.forEach(child => {
-        //         this.dataSearch.push({ item_id: child._id, item_name: child.name });
-        //     })
-        // })
+
         this.dataSearch = [...this.dataSearch];
-        console.log(this.dataSearch);
-        this.createTestData();
     }
 
-    createTestData() {
-        this.testData = [
-            { item_id: 22, item_name: 'Campus Safety' },
-            { item_id: 223, item_name: 'Parking Garage' },
-            { item_id: 123, item_name: 'Library' },
-            { item_id: 999, item_name: 'Book Store' },
-            { item_id: '1', item_name: 'Gym' },
-            { item_id: '3', item_name: 'COE' },
-            { item_id: '4', item_name: 'COAS' },
-            { item_id: '5', item_name: 'COA' },
-            { item_id: '6', item_name: 'COB' },
-            { item_id: '11', item_name: 'Vending Near Me' },
-            { item_id: '12', item_name: 'Nearest Restroom' },
-            { item_id: '13', item_name: 'Student Union' },
-            { item_id: '14', item_name: 'New Res One' },
-            { item_id: '15', item_name: 'Post Office' },
-        ];
-        console.log(this.testData);
+    pointToLatLng(point: PointLocation): L.LatLng {
+        return new L.LatLng(point.lat, point.lng);
     }
 }
