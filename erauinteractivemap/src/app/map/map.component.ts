@@ -55,8 +55,8 @@ export class MapComponent implements OnInit {
 
     // public searchText: string = '';
 
-    testData: any = [];
-    dataSearch: any = [];
+    testData: { item_id: any, item_name: string }[] = [];
+    dataSearch: { item_id: any, item_name: string }[] = [];
     selectedItems = [
         { item_id: 10, item_name: 'Campus Search' },
     ];
@@ -98,7 +98,7 @@ export class MapComponent implements OnInit {
             this.cdr.detectChanges();
         });
         map.on('locationfound', (e) => {
-            const loc = this.translateRealToMap(e.latlng);
+            const loc = this.translateRealToMap(e.latlng); 4
 
             // if the user is outside the map, then remove the marker and radius
             if (!this.imageBounds.contains(loc)) {
@@ -204,12 +204,22 @@ export class MapComponent implements OnInit {
     }
 
     populateSearchData(data: any) {
+        let i: number = -1;
         data.buildings.forEach((building: Building) => {
-            this.dataSearch.push({ item_id: building._id, item_name: building.name });
-            building.children.forEach(child => {
-                this.dataSearch.push({ item_id: child._id, item_name: child.name });
+            i++;
+            this.dataSearch[i] = { item_id: building._id, item_name: building.name };
+            building.children.forEach((child: BuildingChild) => {
+                i++;
+                this.dataSearch[i] = { item_id: child._id, item_name: child.name };
             })
         })
+        // data.buildings.forEach((building: Building) => {
+        //     this.dataSearch.push({ item_id: building._id, item_name: building.name });
+        //     building.children.forEach(child => {
+        //         this.dataSearch.push({ item_id: child._id, item_name: child.name });
+        //     })
+        // })
+        this.dataSearch = [...this.dataSearch];
         console.log(this.dataSearch);
         this.createTestData();
     }
