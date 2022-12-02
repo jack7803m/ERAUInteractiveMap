@@ -172,6 +172,15 @@ export class MapComponent implements OnInit {
     createBuildingMarker(building: Building) {
         const marker = L.marker(building.location).addTo(this.map!);
 
+        //GET ICON FROM BUILDING PIN CATAGORY
+        const icon = this.pinCategories?.find((pin) => pin._id === building.category)?.icon;
+
+        marker.setIcon(L.icon({
+            iconUrl: 'assets/pins/' + icon,
+            iconSize: [25, 25],
+            iconAnchor: [10, 10],
+        }));
+
         marker.on('click', (e: L.LeafletMouseEvent) => {
             this.infoDisplayObject = building;
             this.displayInfo = true;
@@ -182,6 +191,14 @@ export class MapComponent implements OnInit {
 
     createChildMarker(child: BuildingChild) {
         const marker = L.marker(child.location).addTo(this.map!);
+
+        const icon = this.pinCategories?.find((pin) => pin._id === child.category)?.icon;
+
+        marker.setIcon(L.icon({
+            iconUrl: 'assets/pins/' + icon,
+            iconSize: [25, 25],
+            iconAnchor: [10, 10],
+        }));
 
         marker.on('click', (e: L.LeafletMouseEvent) => {
             this.infoDisplayObject = child;
