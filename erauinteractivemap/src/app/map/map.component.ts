@@ -184,6 +184,15 @@ export class MapComponent implements OnInit {
     createBuildingMarker(building: Building) {
         const marker = L.marker(building.location).addTo(this.map!);
 
+        //GET ICON FROM BUILDING PIN CATAGORY
+        const icon = this.pinCategories?.find((pin) => pin._id === building.category)?.icon;
+
+        marker.setIcon(L.icon({
+            iconUrl: 'assets/pins/' + icon,
+            iconSize: [25, 25],
+            iconAnchor: [12.5, 12.5],
+        }));
+
         marker.on('click', (e: L.LeafletMouseEvent) => {
             this.infoDisplayObject = building;
             this.displayInfo = true;
@@ -195,52 +204,19 @@ export class MapComponent implements OnInit {
     createChildMarker(child: BuildingChild) {
         const marker = L.marker(child.location).addTo(this.map!);
 
+        const icon = this.pinCategories?.find((pin) => pin._id === child.category)?.icon;
+
+        marker.setIcon(L.icon({
+            iconUrl: 'assets/pins/' + icon,
+            iconSize: [25, 25],
+            iconAnchor: [12.5, 12.5],
+        }));
+
         marker.on('click', (e: L.LeafletMouseEvent) => {
             this.infoDisplayObject = child;
             this.displayInfo = true;
             this.cdr.detectChanges();
             this.map?.setZoomAround(e.latlng, 18);
         });
-    }
-
-    populateSearchData(data: any) {
-        let i: number = -1;
-        data.buildings.forEach((building: Building) => {
-            i++;
-            this.dataSearch[i] = { item_id: building._id, item_name: building.name };
-            building.children.forEach((child: BuildingChild) => {
-                i++;
-                this.dataSearch[i] = { item_id: child._id, item_name: child.name };
-            })
-        })
-        // data.buildings.forEach((building: Building) => {
-        //     this.dataSearch.push({ item_id: building._id, item_name: building.name });
-        //     building.children.forEach(child => {
-        //         this.dataSearch.push({ item_id: child._id, item_name: child.name });
-        //     })
-        // })
-        this.dataSearch = [...this.dataSearch];
-        console.log(this.dataSearch);
-        this.createTestData();
-    }
-
-    createTestData() {
-        this.testData = [
-            { item_id: 22, item_name: 'Campus Safety' },
-            { item_id: 223, item_name: 'Parking Garage' },
-            { item_id: 123, item_name: 'Library' },
-            { item_id: 999, item_name: 'Book Store' },
-            { item_id: '1', item_name: 'Gym' },
-            { item_id: '3', item_name: 'COE' },
-            { item_id: '4', item_name: 'COAS' },
-            { item_id: '5', item_name: 'COA' },
-            { item_id: '6', item_name: 'COB' },
-            { item_id: '11', item_name: 'Vending Near Me' },
-            { item_id: '12', item_name: 'Nearest Restroom' },
-            { item_id: '13', item_name: 'Student Union' },
-            { item_id: '14', item_name: 'New Res One' },
-            { item_id: '15', item_name: 'Post Office' },
-        ];
-        console.log(this.testData);
     }
 }
