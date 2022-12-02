@@ -22,6 +22,21 @@ export class InfoDisplayComponent implements OnInit {
     this.mapDataService.mapData.subscribe(data => {
       this.pinCategories = data.pins;
     });
+
+    if (this.editable) {
+      this.markerData = {
+        _parent: "" as any,
+        _id: "" as any,
+        name: "",
+        description: "",
+        location: {
+          lat: 0,
+          lng: 0
+        },
+        category: "" as any,
+        type: undefined
+      }
+    }
   }
 
   onDirections(): void  {

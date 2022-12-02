@@ -3,7 +3,7 @@ import * as L from 'leaflet';
 import { ToastrService } from 'ngx-toastr';
 import { MapDataService } from '../_services/map-data.service';
 import { IDropdownSettings } from 'ng-multiselect-dropdown';
-import { Building, BuildingChild, DatabaseSchema, Pin } from 'shared/models/database-schema.model';
+import { Building, BuildingChild, DatabaseSchema, Pin, PointLocation } from 'shared/models/database-schema.model';
 import { InfoDisplayComponent } from '../_shared/info-display/info-display.component';
 
 
@@ -53,14 +53,11 @@ export class MapComponent implements OnInit {
     };
 
 
-    // public searchText: string = '';
-
-    testData: { item_id: any, item_name: string }[] = [];
     dataSearch: { item_id: any, item_name: string }[] = [];
+    // ALLOW FOR THE ITEMS TO BE SELECTED
     selectedItems = [
-        { item_id: 10, item_name: 'Campus Search' },
+        { item_id: "", item_name: 'Campus Search' },
     ];
-    //ALLOW FOR THE ITEMS TO BE SELECTED
     dropDownSettings: IDropdownSettings = {
         singleSelection: true,
         idField: 'item_id',
@@ -178,7 +175,19 @@ export class MapComponent implements OnInit {
     }
 
     onItemSelect(ev: any) {
-        console.log(ev);
+        let b = this.buildings?.find(building => building._id === ev.item_id);
+        if (b) {
+            this.onClick(b);
+            return;
+        }
+
+        this.buildings?.forEach(building => {
+            let c = building.children.find(child => child._id === ev.item_id);
+            if (c) {
+                this.onClick(c);
+                return;
+            }
+        })
     }
 
     createBuildingMarker(building: Building) {
@@ -194,10 +203,7 @@ export class MapComponent implements OnInit {
         }));
 
         marker.on('click', (e: L.LeafletMouseEvent) => {
-            this.infoDisplayObject = building;
-            this.displayInfo = true;
-            this.cdr.detectChanges();
-            this.map?.setZoomAround(e.latlng, 18);
+            this.onClick(building);
         });
     }
 
@@ -213,10 +219,32 @@ export class MapComponent implements OnInit {
         }));
 
         marker.on('click', (e: L.LeafletMouseEvent) => {
-            this.infoDisplayObject = child;
-            this.displayInfo = true;
-            this.cdr.detectChanges();
-            this.map?.setZoomAround(e.latlng, 18);
+            this.onClick(child);
         });
+    }
+
+    onClick(b: Building | BuildingChild) {
+        this.infoDisplayObject = b;
+        this.displayInfo = true;
+        this.cdr.detectChanges();
+        this.map?.setZoomAround(this.pointToLatLng(b.location), 18);
+    }
+
+    populateSearchData(data: any) {
+        let i: number = -1;
+        data.buildings.forEach((building: Building) => {
+            i++;
+            this.dataSearch[i] = { item_id: building._id, item_name: building.name };
+            building.children.forEach((child: BuildingChild) => {
+                i++;
+                this.dataSearch[i] = { item_id: child._id, item_name: child.name };
+            })
+        })
+
+        this.dataSearch = [...this.dataSearch];
+    }
+
+    pointToLatLng(point: PointLocation): L.LatLng {
+        return new L.LatLng(point.lat, point.lng);
     }
 }

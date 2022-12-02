@@ -14,17 +14,13 @@ export async function onRequestPost(context: any): Promise<Response> {
 
     // go fetch the old data from the database
     let allBuildings = await db.collection('buildings').find() as Building[];
-    let allPins = await db.collection('pins').find() as Pin[];
 
     let oldData: DatabaseSchema = {
         buildings: allBuildings,
-        pins: allPins,
+        pins: [],
     };
 
-    console.log(JSON.stringify(newData));
-    console.log(JSON.stringify(oldData));
     // compare the old data to the new data and apply any changes
-
     // * next check all the buildings
     for (const oldBuilding of oldData.buildings) {
         const updatedBuilding = newData.buildings.find((building) => {
@@ -61,19 +57,19 @@ export async function onRequestPost(context: any): Promise<Response> {
 
     // * finally check all the building properties
     for (const oldBuilding of oldData.buildings) {
-        const building = newData.buildings.find((building) => { return building._id.toString() === oldBuilding._id.toString(); });
+        const newBuilding = newData.buildings.find((building) => { return building._id.toString() === oldBuilding._id.toString(); });
 
-        if (!building) continue; // this should never happen
+        if (!newBuilding) continue; // this should never happen
 
-        for (const oldProperty of oldBuilding.children) {
-            const updatedProperty = building.children.find((property) => {
-                if (property._id.toString() !== oldProperty._id.toString()) {
+        for (const oldChild of oldBuilding.children) {
+            const updatedChild = newBuilding.children.find((newChild) => {
+                if (newChild._id.toString() !== oldChild._id.toString()) {
                     return false;
                 }
 
-                for (let i = 0; i < Object.values(property).length; i++) {
-                    const oldValue = Object.values(oldProperty)[i];
-                    const newValue = Object.values(property)[i];
+                for (let i = 0; i < Object.values(newChild).length; i++) {
+                    const oldValue = Object.values(oldChild)[i];
+                    const newValue = Object.values(newChild)[i];
 
                     if (oldValue !== newValue) {
                         return true;
@@ -83,16 +79,16 @@ export async function onRequestPost(context: any): Promise<Response> {
                 return false;
             })
 
-            if (!updatedProperty) continue;
+            if (!updatedChild) continue;
 
             let update: { $set: any } = { $set: {} };
-            update.$set['children.$[elem]'] = updatedProperty;
+            update.$set['children.$[elem]'] = updatedChild;
 
             // not awaiting the database call because we don't care about the result. hopefully it updates ¯\_(ツ)_/¯
             db.collection('buildings').updateOne(
-                { _id: { $oid: building._id } },
+                { _id: { $oid: newBuilding._id } },
                 update,
-                { arrayFilters: [{ 'elem._id': updatedProperty._id }] }
+                { arrayFilters: [{ 'elem._id': { $oid: updatedChild._id } }] }
             );
         }
 
