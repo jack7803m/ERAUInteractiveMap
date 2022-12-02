@@ -26,7 +26,7 @@ export class AdminMapComponent implements OnInit, ICanDeactivate {
 
     public readonly imageBounds: L.LatLngBounds = new L.LatLngBounds([
         [0, 0],
-        [1700, 1568],
+        [3421, 3222],
     ]);
 
     private map?: L.Map;
@@ -74,11 +74,7 @@ export class AdminMapComponent implements OnInit, ICanDeactivate {
 
     public options: L.MapOptions = {
         layers: [
-            L.imageOverlay('assets/images/campus-map-trans.png', this.imageBounds),
-            L.imageOverlay(
-                'assets/images/campus-map-walkable-trans.png',
-                this.imageBounds
-            ),
+            L.imageOverlay('assets/images/map.png', this.imageBounds),
         ],
         zoom: 17,
         zoomSnap: 0,
@@ -342,8 +338,8 @@ export class AdminMapComponent implements OnInit, ICanDeactivate {
         let iconName = this.pinCategories.find(c => c._id === building.category)?.icon;
         marker.setIcon(L.icon({
             iconUrl: iconName ? `assets/pins/${iconName}` : 'assets/icons/generic.png',
-            iconSize: [25, 25],
-            iconAnchor: [12.5, 12.5],
+            iconSize: [30, 30],
+            iconAnchor: [15, 15],
         }))
 
         marker.on('dragend', (e: L.DragEndEvent) => {
@@ -365,8 +361,8 @@ export class AdminMapComponent implements OnInit, ICanDeactivate {
         let iconName = this.pinCategories.find(c => c._id === child.category)?.icon;
         marker.setIcon(L.icon({
             iconUrl: iconName ? `assets/pins/${iconName}` : 'assets/icons/generic.png',
-            iconSize: [25, 25],
-            iconAnchor: [12.5, 12.5],
+            iconSize: [30, 30],
+            iconAnchor: [15, 15],
         }))
 
         marker.on('dragend', (e: L.DragEndEvent) => {
