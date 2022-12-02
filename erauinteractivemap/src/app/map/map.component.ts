@@ -184,7 +184,7 @@ export class MapComponent implements OnInit {
         }
 
         this.buildings?.forEach(building => {
-            let c = building.children.find(child => child._id === ev.item_id);
+            let c = building.children.find(child => child.kid === ev.item_id);
             if (c) {
                 this.onClick(c);
                 return;
@@ -193,7 +193,7 @@ export class MapComponent implements OnInit {
     }
 
     createBuildingMarker(building: Building) {
-        const marker = L.marker(building.location).addTo(this.map!);
+        const marker = L.marker(building.location, { zIndexOffset: 100 }).addTo(this.map!);
 
         //GET ICON FROM BUILDING PIN CATAGORY
         const icon = this.pinCategories?.find((pin) => pin._id === building.category)?.icon;
@@ -238,7 +238,7 @@ export class MapComponent implements OnInit {
                 this.dataSearch.push({ item_id: building._id, item_name: building.name });
             }
             building.children.forEach((child: BuildingChild) => {
-                this.dataSearch.push({ item_id: child._id, item_name: child.name });
+                this.dataSearch.push({ item_id: child.kid, item_name: child.name });
             })
         })
 

@@ -13,7 +13,8 @@ export async function onRequestPost(context: any): Promise<Response> {
         (await request.json()) as CreateBuildingPropertyRequest;
 
     let propertyData = createRequest.propertyData as any;
-    propertyData._id = new Realm.BSON.ObjectId();
+    propertyData.kid = new Realm.BSON.ObjectId();
+    propertyData.kid = propertyData.kid.toString();
 
     // EXAMPLE:: $push { entrances: propertydata }
     let update: { $push: any } = { $push: {} };
@@ -23,7 +24,7 @@ export async function onRequestPost(context: any): Promise<Response> {
         .collection('buildings')
         .updateOne({ _id: { $oid: createRequest.buildingId } }, update);
 
-    return new Response(JSON.stringify({ id: propertyData._id }), {
+    return new Response(JSON.stringify({ id: propertyData.kid }), {
         status: 200,
         statusText: 'OK',
     });
@@ -38,9 +39,9 @@ export async function onRequestDelete(context: any): Promise<Response> {
 
     const deleteRequest = (await request.json()) as DeleteBuildingPropertyRequest;
 
-    // EXAMPLE:: $pull { entrances: { _id: propertyId } }
+    // EXAMPLE:: $pull { entrances: { kid: propertyId } }
     let update: { $pull: any } = { $pull: {} };
-    update.$pull[`children`] = { _id: deleteRequest.propertyId };
+    update.$pull[`children`] = { kid: deleteRequest.propertyId };
 
     await db
         .collection('buildings')
