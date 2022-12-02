@@ -8,17 +8,21 @@
     background: white;
 }
 
-.search{
+.search {
+    position: fixed;
     display: flex;
-        width: auto;
-        height: auto;
-        left: 50%;
-        justify-content: center;
-        z-index: 10;
+    width: auto;
+    height: auto;
+    left: 40vw;
+    justify-content: center;
+    z-index: 10;
+    top: 2vh;
+    background-color: white;
+    border-radius: 5px;
 }
 
- .white-bar {
-position: fixed;
+.white-bar {
+    position: fixed;
     display: flex;
     top: 0;
     left: 0;
@@ -35,15 +39,15 @@ position: fixed;
     justify-content: center;
 }
 
- .iconz {
+.iconz {
     font-size: 24px;
     transform: scale(1.5);
     margin-left: 20px;
     z-index: 10;
     cursor: pointer;
- }
+}
 
- .displayInfo {
+.displayInfo {
     // shadow
     box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.6);
- }
+}
