@@ -275,6 +275,7 @@ export class AdminMapComponent implements OnInit, ICanDeactivate {
         this.adminService.createBuildingProperty({
             buildingId: this.childAddForm.building as any,
             propertyData: {
+                _parent: this.childAddForm.building as any,
                 name: this.childAddForm.name,
                 description: this.childAddForm.description,
                 category: this.childAddForm.category as any,
@@ -335,19 +336,19 @@ export class AdminMapComponent implements OnInit, ICanDeactivate {
     }
 
     private createBuildingMarker(building: Building) {
-        let pin = this.pinCategories?.find(pin => pin._id === building.category);
-        let icon = pin?.icon;
+        
         const marker = L.marker(building.location, { draggable: true, autoPan: true }).addTo(this.map!);
+
+        let iconName = this.pinCategories.find(c => c._id === building.category)?.icon;
+        marker.setIcon(L.icon({
+            iconUrl: iconName ? `assets/pins/${iconName}` : 'assets/icons/generic.png',
+            iconSize: [25, 25],
+            iconAnchor: [12.5, 12.5],
+        }))
 
         marker.on('dragend', (e: L.DragEndEvent) => {
             this.changes = true;
-            const newLocation = e.target.getLatLng();
-            let b = this.mapData?.buildings.find(b => b._id.toString() === building._id.toString());
-            if (b) {
-                b.location = newLocation;
-            } else {
-                this.toastr.error("Error updating building location");
-            }
+            building.location = e.target.getLatLng();
         });
 
         marker.on('click', (e: L.LeafletMouseEvent) => {
@@ -361,18 +362,17 @@ export class AdminMapComponent implements OnInit, ICanDeactivate {
     private createChildMarker(child: BuildingChild) {
         const marker = L.marker(child.location, { draggable: true, autoPan: true }).addTo(this.map!);
 
+        let iconName = this.pinCategories.find(c => c._id === child.category)?.icon;
+        marker.setIcon(L.icon({
+            iconUrl: iconName ? `assets/pins/${iconName}` : 'assets/icons/generic.png',
+            iconSize: [25, 25],
+            iconAnchor: [12.5, 12.5],
+        }))
+
         marker.on('dragend', (e: L.DragEndEvent) => {
             this.changes = true;
-            const newLocation = e.target.getLatLng();
-            // find the child in the map data
-            let b = this.mapData?.buildings.find(b => b.children.find(c => c._id.toString() === child._id.toString()));
-            let c = b?.children.find(c => c._id.toString() === child._id.toString());
-
-            if (c) {
-                c.location = newLocation;
-            } else {
-                this.toastr.error("Error updating child location");
-            }
+            child.location = e.target.getLatLng();
+            console.log(child);
         });
 
         marker.on('click', (e: L.LeafletMouseEvent) => {
@@ -398,6 +398,7 @@ export class AdminMapComponent implements OnInit, ICanDeactivate {
     }
 
     private deleteChild(marker: BuildingChild) {
+        console.log("Deleting child: " + marker._parent);
         this.adminService.deleteBuildingProperty(new DeleteBuildingPropertyRequest(marker._parent, marker._id)).subscribe({
             next: (data) => {
                 // remove from map data

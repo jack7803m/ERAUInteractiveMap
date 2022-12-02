@@ -23,6 +23,7 @@ export class CreateBuildingRequest {
 export class CreateBuildingPropertyRequest {
     buildingId: Realm.BSON.ObjectId;
     propertyData: {
+        _parent: Realm.BSON.ObjectId;
         name: string;
         description: string;
         type: string;
