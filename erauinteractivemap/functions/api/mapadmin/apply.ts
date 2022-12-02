@@ -88,7 +88,7 @@ export async function onRequestPost(context: any): Promise<Response> {
             db.collection('buildings').updateOne(
                 { _id: { $oid: newBuilding._id } },
                 update,
-                { arrayFilters: [{ 'elem._id': updatedChild._id }] }
+                { arrayFilters: [{ 'elem._id': { $oid: updatedChild._id } }] }
             );
         }
 
