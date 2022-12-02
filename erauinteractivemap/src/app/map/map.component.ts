@@ -190,4 +190,6 @@ export class MapComponent implements OnInit {
             this.map?.setZoomAround(e.latlng, 18);
         });
     }
+
+    //findCatagory()
 }
