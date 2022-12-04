@@ -21,7 +21,7 @@ export class PathFinderService {
         let canvas = document.createElement('canvas');
         let ctx = canvas.getContext('2d');
         let img = new Image();
-        img.src = 'assets/images/mapWalkLayer.png';
+        img.src = 'assets/images/walkyPixels.png';
         img.onload = () => {
             canvas.width = img.width;
             canvas.height = img.height;
@@ -42,10 +42,10 @@ export class PathFinderService {
                         let b = data[index + 2];
                         let a = data[index + 3];
                         if (a > 0) {
-                            row.push(1);
+                            row.push(0);
                             this.arrayOfNonTransparentPixels.push(new Point(j, i));
                         } else {
-                            row.push(0);
+                            row.push(1);
                         }
                     }
                     pixelArray.push(row);
