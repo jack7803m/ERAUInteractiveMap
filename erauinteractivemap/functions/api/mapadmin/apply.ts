@@ -63,7 +63,7 @@ export async function onRequestPost(context: any): Promise<Response> {
 
         for (const oldChild of oldBuilding.children) {
             const updatedChild = newBuilding.children.find((newChild) => {
-                if (newChild._id.toString() !== oldChild._id.toString()) {
+                if (newChild.kid.toString() !== oldChild.kid.toString()) {
                     return false;
                 }
 
@@ -88,7 +88,8 @@ export async function onRequestPost(context: any): Promise<Response> {
             db.collection('buildings').updateOne(
                 { _id: { $oid: newBuilding._id } },
                 update,
-                { arrayFilters: [{ 'elem._id': { $oid: updatedChild._id } }] }
+                // { arrayFilters: [{ 'elem.kid': { $oid: updatedChild.kid } }] }
+                { arrayFilters: [{ 'elem.kid': updatedChild.kid }] }
             );
         }
 

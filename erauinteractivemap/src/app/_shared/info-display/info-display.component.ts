@@ -26,7 +26,7 @@ export class InfoDisplayComponent implements OnInit {
     if (this.editable) {
       this.markerData = {
         _parent: "" as any,
-        _id: "" as any,
+        kid: "" as any,
         name: "",
         description: "",
         location: {

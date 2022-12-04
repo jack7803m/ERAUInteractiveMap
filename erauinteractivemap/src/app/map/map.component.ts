@@ -23,7 +23,7 @@ export class MapComponent implements OnInit {
     ]);
     public readonly imageBounds: L.LatLngBounds = new L.LatLngBounds([
         [0, 0],
-        [1700, 1568],
+        [3421, 3222],
     ]);
     private map?: L.Map;
     userLocation?: L.Marker;
@@ -69,24 +69,26 @@ export class MapComponent implements OnInit {
     };
 
     ngOnInit(): void {
+        this.mapDataService.getMapData();
     }
 
     // do all configuration here that is not done in the template/options
     // this basically includes 'subscribing' to map events with map.on()
     onMapReady(map: L.Map) {
-        this.mapDataService.getMapData();
 
         this.mapDataService.mapData.subscribe((data) => {
             this.mapData = data;
             this.pinCategories = data.pins;
             this.buildings = data.buildings;
             data.buildings.forEach(building => {
-                this.createBuildingMarker(building);
+                if (building.name !== "Campus") {
+                    this.createBuildingMarker(building);
+                }
                 building.children.forEach(child => {
                     this.createChildMarker(child);
-                    this.populateSearchData(data);
                 })
             })
+            this.populateSearchData(data);
         })
 
         this.map = map;
@@ -182,7 +184,7 @@ export class MapComponent implements OnInit {
         }
 
         this.buildings?.forEach(building => {
-            let c = building.children.find(child => child._id === ev.item_id);
+            let c = building.children.find(child => child.kid === ev.item_id);
             if (c) {
                 this.onClick(c);
                 return;
@@ -191,15 +193,15 @@ export class MapComponent implements OnInit {
     }
 
     createBuildingMarker(building: Building) {
-        const marker = L.marker(building.location).addTo(this.map!);
+        const marker = L.marker(building.location, { zIndexOffset: 100 }).addTo(this.map!);
 
         //GET ICON FROM BUILDING PIN CATAGORY
         const icon = this.pinCategories?.find((pin) => pin._id === building.category)?.icon;
 
         marker.setIcon(L.icon({
             iconUrl: 'assets/pins/' + icon,
-            iconSize: [25, 25],
-            iconAnchor: [12.5, 12.5],
+            iconSize: [30, 30],
+            iconAnchor: [15, 15],
         }));
 
         marker.on('click', (e: L.LeafletMouseEvent) => {
@@ -214,8 +216,8 @@ export class MapComponent implements OnInit {
 
         marker.setIcon(L.icon({
             iconUrl: 'assets/pins/' + icon,
-            iconSize: [25, 25],
-            iconAnchor: [12.5, 12.5],
+            iconSize: [30, 30],
+            iconAnchor: [15, 15],
         }));
 
         marker.on('click', (e: L.LeafletMouseEvent) => {
@@ -231,13 +233,12 @@ export class MapComponent implements OnInit {
     }
 
     populateSearchData(data: any) {
-        let i: number = -1;
         data.buildings.forEach((building: Building) => {
-            i++;
-            this.dataSearch[i] = { item_id: building._id, item_name: building.name };
+            if (building.name !== "Campus") {
+                this.dataSearch.push({ item_id: building._id, item_name: building.name });
+            }
             building.children.forEach((child: BuildingChild) => {
-                i++;
-                this.dataSearch[i] = { item_id: child._id, item_name: child.name };
+                this.dataSearch.push({ item_id: child.kid, item_name: child.name });
             })
         })
 

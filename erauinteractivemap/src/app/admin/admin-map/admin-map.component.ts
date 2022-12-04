@@ -26,7 +26,7 @@ export class AdminMapComponent implements OnInit, ICanDeactivate {
 
     public readonly imageBounds: L.LatLngBounds = new L.LatLngBounds([
         [0, 0],
-        [1700, 1568],
+        [3421, 3222],
     ]);
 
     private map?: L.Map;
@@ -74,11 +74,7 @@ export class AdminMapComponent implements OnInit, ICanDeactivate {
 
     public options: L.MapOptions = {
         layers: [
-            L.imageOverlay('assets/images/campus-map-trans.png', this.imageBounds),
-            L.imageOverlay(
-                'assets/images/campus-map-walkable-trans.png',
-                this.imageBounds
-            ),
+            L.imageOverlay('assets/images/map.png', this.imageBounds),
         ],
         zoom: 17,
         zoomSnap: 0,
@@ -286,7 +282,7 @@ export class AdminMapComponent implements OnInit, ICanDeactivate {
             next: (data) => {
                 let newChild: BuildingChild = {
                     _parent: this.childAddForm.building as any,
-                    _id: data.id,
+                    kid: data.id,
                     name: this.childAddForm.name,
                     description: this.childAddForm.description,
                     category: this.childAddForm.category as any,
@@ -316,7 +312,7 @@ export class AdminMapComponent implements OnInit, ICanDeactivate {
         if (!this.mapData) return;
         // search through mapdata, find the building/child and update it
         if (this.placeInfoForm.child) {
-            let child: BuildingChild | undefined = this.mapData.buildings.flatMap(b => b.children).find(c => c._id.toString() === this.placeInfoForm.id);
+            let child: BuildingChild | undefined = this.mapData.buildings.flatMap(b => b.children).find(c => c.kid.toString() === this.placeInfoForm.id);
 
             if (child) {
                 child.name = this.placeInfoForm.name;
@@ -342,8 +338,8 @@ export class AdminMapComponent implements OnInit, ICanDeactivate {
         let iconName = this.pinCategories.find(c => c._id === building.category)?.icon;
         marker.setIcon(L.icon({
             iconUrl: iconName ? `assets/pins/${iconName}` : 'assets/icons/generic.png',
-            iconSize: [25, 25],
-            iconAnchor: [12.5, 12.5],
+            iconSize: [30, 30],
+            iconAnchor: [15, 15],
         }))
 
         marker.on('dragend', (e: L.DragEndEvent) => {
@@ -365,8 +361,8 @@ export class AdminMapComponent implements OnInit, ICanDeactivate {
         let iconName = this.pinCategories.find(c => c._id === child.category)?.icon;
         marker.setIcon(L.icon({
             iconUrl: iconName ? `assets/pins/${iconName}` : 'assets/icons/generic.png',
-            iconSize: [25, 25],
-            iconAnchor: [12.5, 12.5],
+            iconSize: [30, 30],
+            iconAnchor: [15, 15],
         }))
 
         marker.on('dragend', (e: L.DragEndEvent) => {
@@ -384,10 +380,6 @@ export class AdminMapComponent implements OnInit, ICanDeactivate {
     }
 
     deleteMarker(marker: Building | BuildingChild): void {
-        if (!marker._id) {
-            this.toastr.error("Error deleting marker: no id");
-            return;
-        }
 
         if (marker.hasOwnProperty('children')) {
             this.toastr.error("Cannot delete buildings from the map! Need to do it directly in the database.");
@@ -399,13 +391,13 @@ export class AdminMapComponent implements OnInit, ICanDeactivate {
 
     private deleteChild(marker: BuildingChild) {
         console.log("Deleting child: " + marker._parent);
-        this.adminService.deleteBuildingProperty(new DeleteBuildingPropertyRequest(marker._parent, marker._id)).subscribe({
+        this.adminService.deleteBuildingProperty(new DeleteBuildingPropertyRequest(marker._parent, marker.kid)).subscribe({
             next: (data) => {
                 // remove from map data
                 marker = marker as BuildingChild;
                 let building = this.mapData?.buildings.find(b => b._id.toString() === marker._parent.toString());
                 if (building) {
-                    building.children = building.children.filter(c => c._id.toString() !== marker._id.toString());
+                    building.children = building.children.filter(c => c.kid.toString() !== marker.kid.toString());
                 }
 
                 this.toastr.success("Successfully deleted child");

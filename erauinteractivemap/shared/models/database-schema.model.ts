@@ -22,7 +22,7 @@ export interface PointLocation {
 
 export interface BuildingChild {
     _parent: Realm.BSON.ObjectId;
-    _id: Realm.BSON.ObjectId;
+    kid: Realm.BSON.ObjectId;
     type: BuildingPropertyName | undefined;
     name: string;
     description: string;
