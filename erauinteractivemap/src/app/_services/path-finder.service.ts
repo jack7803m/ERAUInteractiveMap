@@ -35,9 +35,9 @@ export class PathFinderService {
             let width = imgData?.width;
             let height = imgData?.height;
             let pixelArray: number[][] = [];
-            console.log(data, " data", width, " width", height, " height");
+            console.log(width, " width", height, " height");
             if (data && width && height) {
-                for (let i = 0; i < height; i++) {
+                for (let i = height; i > 0; i--) {
                     let row: number[] = [];
                     for (let j = 0; j < width; j++) {
                         let index = (i * width + j) * 4;
@@ -55,9 +55,6 @@ export class PathFinderService {
                     pixelArray.push(row);
                 }
                 this.pixelArray = pixelArray;
-                console.log("made past IF");
-                console.log(this.arrayOfNonTransparentPixels.length + " arrayOfNonTransparentPixels");
-                console.log(this.pixelArray[0].length);
                 //this.findOptimalPath(new Point(0, 0) as IPoint, new Point(9, 9) as IPoint);
             }
             this.imgLoaded.next(load);
@@ -65,19 +62,6 @@ export class PathFinderService {
     }
 
     findOptimalPath(start: IPoint, end: IPoint): any {
-        let testMatrix = [
-            [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-            [0, 1, 1, 0, 1, 1, 1, 1, 1, 0],
-            [0, 1, 1, 1, 0, 1, 1, 1, 1, 0],
-            [0, 1, 1, 1, 1, 0, 1, 1, 1, 0],
-            [0, 1, 1, 1, 1, 1, 0, 1, 1, 0],
-            [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-            [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-            [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        ]
-        console.log(this.pixelArray[0].length);
 
         this.aStarInstance = new AStarFinder({
             grid: {
@@ -86,7 +70,6 @@ export class PathFinderService {
         });
         let path = this.aStarInstance.findPath(start, end);
         console.log(path);
-        return path;
     }
 
 
