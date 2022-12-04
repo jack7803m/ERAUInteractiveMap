@@ -139,11 +139,12 @@ export class MapComponent implements OnInit {
             fill: false,
         }).addTo(map);
 
+        this.pathFinderService.findPixels();
 
         this.pathFinderService.imgLoaded.subscribe(() => {
             this.onFindPath(new Marker(new LatLng(1000, 2222)));
         });
-        this.pathFinderService.findPixels();
+
 
     }
 
@@ -158,8 +159,20 @@ export class MapComponent implements OnInit {
     onFindPath(marker: Marker) {
         // let userLocationPixels: LatLng = this.translateRealToMap(this.userLocation?.getLatLng() as L.LatLng);
         // let markerPixels: LatLng = this.translateRealToMap(marker?.getLatLng() as L.LatLng);
-        //let path = this.pathFinderService.findOptimalPath({ x: 1881.9770877646083, y: 1442.533969217431 } as IPoint, { x: 604.1006333602866, y: 2518.2559237020087 } as IPoint);
+
         let path = this.pathFinderService.findOptimalPath({ x: 359, y: 2638 } as IPoint, { x: 1401, y: 319 } as IPoint);
+        console.log(path.length);
+
+        let pathLatLng: LatLng[] = [];
+
+
+        path.forEach((point: number[]) => {
+            let newPoint = new LatLng(point[1], point[0]);
+            pathLatLng.push(newPoint);
+        });
+
+        let polyline = L.polyline(pathLatLng, { color: 'blue' }).addTo(this.map as L.Map);
+        //this.map?.fitBounds(polyline.getBounds());
     }
 
     click(ev: any) {

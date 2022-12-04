@@ -13,7 +13,8 @@ export class PathFinderService {
     pixelArray: any[][] = [];
     arrayOfNonTransparentPixels: IPoint[] = [];
     imgLoaded: Subject<any> = new Subject<any>();
-    private aStarInstance?: AStarFinder
+    //pathLoaded: Subject<any> = new Subject<any>();
+    private aStarInstance?: AStarFinder;
     constructor() { }
     //CREATE A NODE CLASS FOR A STAR ALGORITHM
 
@@ -70,6 +71,8 @@ export class PathFinderService {
         });
         let path = this.aStarInstance.findPath(start, end);
         console.log(path);
+        return path;
+        //this.pathLoaded.next(path);
     }
 
 
