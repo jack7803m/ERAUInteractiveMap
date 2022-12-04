@@ -5,7 +5,7 @@ import { MapDataService } from '../_services/map-data.service';
 import { IDropdownSettings } from 'ng-multiselect-dropdown';
 import { Building, BuildingChild, DatabaseSchema, Pin, PointLocation } from 'shared/models/database-schema.model';
 import { InfoDisplayComponent } from '../_shared/info-display/info-display.component';
-import { PixelFinderService } from '../_services/pixel-finder.service';
+import { PathFinderService } from '../_services/path-finder.service';
 
 
 @Component({
@@ -14,7 +14,7 @@ import { PixelFinderService } from '../_services/pixel-finder.service';
     styleUrls: ['./map.component.scss'],
 })
 export class MapComponent implements OnInit {
-    constructor(private toastr: ToastrService, private mapDataService: MapDataService, private cdr: ChangeDetectorRef, private pixelFinderService: PixelFinderService) { }
+    constructor(private toastr: ToastrService, private mapDataService: MapDataService, private cdr: ChangeDetectorRef, private pathFinderService: PathFinderService) { }
     @ViewChild('infoDisplay') infoDisplay?: InfoDisplayComponent;
 
 
@@ -135,7 +135,7 @@ export class MapComponent implements OnInit {
             fill: false,
         }).addTo(map);
 
-        this.pixelFinderService.findPixels();
+        this.pathFinderService.findPixels();
     }
 
     onMapLocate() {
