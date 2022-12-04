@@ -6,6 +6,9 @@ import { IDropdownSettings } from 'ng-multiselect-dropdown';
 import { Building, BuildingChild, DatabaseSchema, Pin, PointLocation } from 'shared/models/database-schema.model';
 import { InfoDisplayComponent } from '../_shared/info-display/info-display.component';
 import { PathFinderService } from '../_services/path-finder.service';
+import { LatLng, Marker } from 'leaflet';
+import { IPoint } from 'astar-typescript/dist/interfaces/astar.interfaces';
+import { Subject } from 'rxjs';
 
 
 @Component({
@@ -37,6 +40,7 @@ export class MapComponent implements OnInit {
     buildings?: Building[];
     infoDisplayObject?: Building | BuildingChild;
     displayInfo: boolean = false;
+    subject: Subject<any> = new Subject();
     public options: L.MapOptions = {
         layers: [
             this.mapPng,
@@ -135,7 +139,12 @@ export class MapComponent implements OnInit {
             fill: false,
         }).addTo(map);
 
+
+        this.pathFinderService.imgLoaded.subscribe(() => {
+            this.onFindPath(new Marker(new LatLng(29.192, -81.050)));
+        });
         this.pathFinderService.findPixels();
+
     }
 
     onMapLocate() {
@@ -144,6 +153,16 @@ export class MapComponent implements OnInit {
             // watch is true because we want to keep updating the location
             this.map?.locate({ enableHighAccuracy: true, watch: true });
         }
+    }
+
+    onFindPath(marker: Marker) {
+        // let userLocationPixels: LatLng = this.translateRealToMap(this.userLocation?.getLatLng() as L.LatLng);
+        // let markerPixels: LatLng = this.translateRealToMap(marker?.getLatLng() as L.LatLng);
+        let path = this.pathFinderService.findOptimalPath({ x: 1881.9770877646083, y: 1442.533969217431 } as IPoint, { x: 604.1006333602866, y: 2518.2559237020087 } as IPoint);
+    }
+
+    click(ev: any) {
+        console.log(ev);
     }
 
     onZoomIn() {

@@ -5,7 +5,7 @@
 </div>
 
 <div class="main-map" leaflet [leafletOptions]="options" [leafletFitBounds]="imageBounds"
-    (leafletMapReady)="onMapReady($event)"></div>
+    (leafletMapReady)="onMapReady($event)" (leafletClick)="click($event)"></div>
 
 <!-- UI on top of map -->
 <div class="absolute top-0 left-0 z-50 w-full h-full pointer-events-none">
