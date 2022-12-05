@@ -64,6 +64,8 @@ export class PathFinderService {
 
     findOptimalPath(start: IPoint, end: IPoint): any {
 
+        console.log("start", start, "end", end);
+        console.log(this.pixelArray);
         this.aStarInstance = new AStarFinder({
             grid: {
                 matrix: this.pixelArray

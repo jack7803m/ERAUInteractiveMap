@@ -6,7 +6,7 @@ import { IDropdownSettings } from 'ng-multiselect-dropdown';
 import { Building, BuildingChild, DatabaseSchema, Pin, PointLocation } from 'shared/models/database-schema.model';
 import { InfoDisplayComponent } from '../_shared/info-display/info-display.component';
 import { PathFinderService } from '../_services/path-finder.service';
-import { LatLng, Marker } from 'leaflet';
+import { LatLng, Marker, LeafletMouseEvent } from 'leaflet';
 import { IPoint } from 'astar-typescript/dist/interfaces/astar.interfaces';
 import { Subject } from 'rxjs';
 
@@ -41,6 +41,8 @@ export class MapComponent implements OnInit {
     infoDisplayObject?: Building | BuildingChild;
     displayInfo: boolean = false;
     subject: Subject<any> = new Subject();
+    testLatLng: L.LatLng = new L.LatLng(681, 1583);
+    polyline: L.Polyline | undefined;
     public options: L.MapOptions = {
         layers: [
             this.mapPng,
@@ -141,10 +143,9 @@ export class MapComponent implements OnInit {
 
         this.pathFinderService.findPixels();
 
-        this.pathFinderService.imgLoaded.subscribe(() => {
-            this.onFindPath(new Marker(new LatLng(1000, 2222)));
-        });
-
+        // this.pathFinderService.imgLoaded.subscribe(() => {
+        //     this.onFindPath(new Marker(new LatLng(1000, 2222)));
+        // });
 
     }
 
@@ -156,27 +157,32 @@ export class MapComponent implements OnInit {
         }
     }
 
-    onFindPath(marker: Marker) {
+    onFindPath(latLng: LatLng, latLng2: LatLng) {
+        this.polyline?.remove();
         // let userLocationPixels: LatLng = this.translateRealToMap(this.userLocation?.getLatLng() as L.LatLng);
         // let markerPixels: LatLng = this.translateRealToMap(marker?.getLatLng() as L.LatLng);
 
-        let path = this.pathFinderService.findOptimalPath({ x: 359, y: 2638 } as IPoint, { x: 1401, y: 319 } as IPoint);
+        let path = this.pathFinderService.findOptimalPath({ x: latLng.lng, y: latLng.lat } as IPoint, { x: latLng2.lng, y: latLng2.lat } as IPoint);
         console.log(path.length);
 
         let pathLatLng: LatLng[] = [];
-
 
         path.forEach((point: number[]) => {
             let newPoint = new LatLng(point[1], point[0]);
             pathLatLng.push(newPoint);
         });
 
-        let polyline = L.polyline(pathLatLng, { color: 'blue' }).addTo(this.map as L.Map);
+        this.polyline = L.polyline(pathLatLng, { color: 'cyan' }).addTo(this.map as L.Map);
         //this.map?.fitBounds(polyline.getBounds());
     }
 
-    click(ev: any) {
-        console.log(ev);
+    click(ev: LeafletMouseEvent) {
+        console.log(ev.latlng);
+        // this.testLatLng = ev.latlng;
+        let temp: LatLng = ev.latlng;
+        temp.lat = Math.round(temp.lat);
+        temp.lng = Math.round(temp.lng);
+        this.onFindPath(this.testLatLng, temp);
     }
 
     onZoomIn() {
