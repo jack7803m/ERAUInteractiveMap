@@ -176,6 +176,13 @@ export class MapComponent implements OnInit {
         //this.map?.fitBounds(polyline.getBounds());
     }
 
+    die(ev: Building | BuildingChild) {
+        if (this.userLocation)
+            this.onFindPath(this.userLocation.getLatLng(), { lat: ev.location.lat, lng: ev.location.lng } as LatLng);
+        else
+            this.toastr.error("Please enable location services to use this feature.", "Location Error");
+    }
+
     click(ev: LeafletMouseEvent) {
         console.log(ev.latlng);
         // this.testLatLng = ev.latlng;

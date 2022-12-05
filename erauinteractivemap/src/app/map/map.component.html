@@ -46,7 +46,8 @@
                 </div>
                 <div class="pointer-events-auto m-4 ml-0 rounded-l-none rounded-md bg-white transition-transform p-3 displayInfo"
                     style="width: 16rem;" [hidden]="!displayInfo">
-                    <app-info-display #infoDisplay [markerData]="infoDisplayObject"></app-info-display>
+                    <app-info-display #infoDisplay [markerData]="infoDisplayObject" (onDirection)="die($event)">
+                    </app-info-display>
                 </div>
             </div>
             <div>
