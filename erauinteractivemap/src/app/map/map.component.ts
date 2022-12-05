@@ -177,19 +177,14 @@ export class MapComponent implements OnInit {
     }
 
     die(ev: Building | BuildingChild) {
-        if (this.userLocation)
-            this.onFindPath(this.userLocation.getLatLng(), { lat: ev.location.lat, lng: ev.location.lng } as LatLng);
+        if (this.userLocation) {
+            let userLocationPixels = this.userLocation.getLatLng();
+            let startPix = this.pathFinderService.findNearestWalkablePixel(new L.Point(userLocationPixels.lng, userLocationPixels.lat));
+            let endPix = this.pathFinderService.findNearestWalkablePixel(new L.Point(ev.location.lng, ev.location.lat));
+            this.onFindPath({ lat: startPix.y, lng: startPix.x } as LatLng, { lat: endPix.y, lng: endPix.x } as LatLng);
+        }
         else
             this.toastr.error("Please enable location services to use this feature.", "Location Error");
-    }
-
-    click(ev: LeafletMouseEvent) {
-        console.log(ev.latlng);
-        // this.testLatLng = ev.latlng;
-        let temp: LatLng = ev.latlng;
-        temp.lat = Math.round(temp.lat);
-        temp.lng = Math.round(temp.lng);
-        this.onFindPath(this.testLatLng, temp);
     }
 
     onZoomIn() {

@@ -77,6 +77,25 @@ export class PathFinderService {
         //this.pathLoaded.next(path);
     }
 
+    findNearestWalkablePixel(point: IPoint): IPoint {
+        let nearestPoint = this.arrayOfNonTransparentPixels[0];
+        let shortestDistance = this.distanceBetweenPoints(point, nearestPoint);
+        for (let i = 1; i < this.arrayOfNonTransparentPixels.length; i++) {
+            let distance = this.distanceBetweenPoints(point, this.arrayOfNonTransparentPixels[i]);
+            if (distance < shortestDistance) {
+                shortestDistance = distance;
+                nearestPoint = this.arrayOfNonTransparentPixels[i];
+            }
+        }
+        return nearestPoint;
+    }
+
+    private distanceBetweenPoints(point1: IPoint, point2: IPoint): number {
+        let x = point1.x - point2.x;
+        let y = point1.y - point2.y;
+        return Math.sqrt(x * x + y * y);
+    }
+
 
 }
 
