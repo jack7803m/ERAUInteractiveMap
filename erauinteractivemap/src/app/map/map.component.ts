@@ -5,6 +5,10 @@ import { MapDataService } from '../_services/map-data.service';
 import { IDropdownSettings } from 'ng-multiselect-dropdown';
 import { Building, BuildingChild, DatabaseSchema, Pin, PointLocation } from 'shared/models/database-schema.model';
 import { InfoDisplayComponent } from '../_shared/info-display/info-display.component';
+import { PathFinderService } from '../_services/path-finder.service';
+import { LatLng, Marker, LeafletMouseEvent } from 'leaflet';
+import { IPoint } from 'astar-typescript/dist/interfaces/astar.interfaces';
+import { Subject } from 'rxjs';
 
 
 @Component({
@@ -13,7 +17,7 @@ import { InfoDisplayComponent } from '../_shared/info-display/info-display.compo
     styleUrls: ['./map.component.scss'],
 })
 export class MapComponent implements OnInit {
-    constructor(private toastr: ToastrService, private mapDataService: MapDataService, private cdr: ChangeDetectorRef) { }
+    constructor(private toastr: ToastrService, private mapDataService: MapDataService, private cdr: ChangeDetectorRef, private pathFinderService: PathFinderService) { }
     @ViewChild('infoDisplay') infoDisplay?: InfoDisplayComponent;
 
 
@@ -36,6 +40,9 @@ export class MapComponent implements OnInit {
     buildings?: Building[];
     infoDisplayObject?: Building | BuildingChild;
     displayInfo: boolean = false;
+    subject: Subject<any> = new Subject();
+    testLatLng: L.LatLng = new L.LatLng(681, 1583);
+    polyline: L.Polyline | undefined;
     public options: L.MapOptions = {
         layers: [
             this.mapPng,
@@ -115,7 +122,13 @@ export class MapComponent implements OnInit {
                 this.userLocation.setLatLng(loc);
                 this.userLocationRadius?.setLatLng(loc);
             } else {
-                this.userLocation = L.marker(loc).addTo(map);
+                this.userLocation = L.marker(loc, {
+                    icon: L.icon({
+                        iconUrl: 'assets/pins/loco.png',
+                        iconSize: [20, 20],
+                        iconAnchor: [10, 10],
+                    }),
+                }).addTo(map);
                 this.userLocationRadius = L.circle(loc, {
                     radius: e.accuracy,
                 }).addTo(map);
@@ -133,6 +146,13 @@ export class MapComponent implements OnInit {
             weight: 3,
             fill: false,
         }).addTo(map);
+
+        this.pathFinderService.findPixels();
+
+        // this.pathFinderService.imgLoaded.subscribe(() => {
+        //     this.onFindPath(new Marker(new LatLng(1000, 2222)));
+        // });
+
     }
 
     onMapLocate() {
@@ -141,6 +161,52 @@ export class MapComponent implements OnInit {
             // watch is true because we want to keep updating the location
             this.map?.locate({ enableHighAccuracy: true, watch: true });
         }
+    }
+
+    onFindPath(latLng: LatLng, latLng2: LatLng) {
+        this.polyline?.remove();
+        // let userLocationPixels: LatLng = this.translateRealToMap(this.userLocation?.getLatLng() as L.LatLng);
+        // let markerPixels: LatLng = this.translateRealToMap(marker?.getLatLng() as L.LatLng);
+
+        let path = this.pathFinderService.findOptimalPath({ x: latLng.lng, y: latLng.lat } as IPoint, { x: latLng2.lng, y: latLng2.lat } as IPoint);
+        console.log(path.length);
+
+        let pathLatLng: LatLng[] = [];
+
+        path.forEach((point: number[]) => {
+            let newPoint = new LatLng(point[1], point[0]);
+            pathLatLng.push(newPoint);
+        });
+
+        this.polyline = L.polyline(pathLatLng, { color: 'cyan' }).addTo(this.map as L.Map);
+        //this.map?.fitBounds(polyline.getBounds());
+    }
+
+    clickOnMap(e: L.LeafletMouseEvent) {
+        // let latLng = e.latlng;
+        // let found = this.pathFinderService.findNearestWalkablePixel(e.latlng);
+        // console.log(found);
+        // // add to map
+        // let marker = L.marker(found, {
+        //     icon: L.icon({
+        //         iconUrl: 'assets/pins/loco.png',
+        //         iconSize: [32, 32],
+        //         iconAnchor: [16, 16],
+        //     }),
+        // }).addTo(this.map as L.Map);
+    }
+
+    die(ev: Building | BuildingChild) {
+        if (this.userLocation) {
+            let userLocationPixels = this.userLocation.getLatLng();
+            let startPix = this.pathFinderService.findNearestWalkablePixel(userLocationPixels);
+            let endPix = this.pathFinderService.findNearestWalkablePixel(new LatLng(ev.location.lat, ev.location.lng));
+            this.onFindPath(startPix, endPix);
+            // zoom out to show the whole path
+            this.map?.fitBounds(this.polyline?.getBounds() as L.LatLngBounds);
+        }
+        else
+            this.toastr.error("Please enable location services to use this feature.", "Location Error");
     }
 
     onZoomIn() {
@@ -248,4 +314,6 @@ export class MapComponent implements OnInit {
     pointToLatLng(point: PointLocation): L.LatLng {
         return new L.LatLng(point.lat, point.lng);
     }
+
+
 }
