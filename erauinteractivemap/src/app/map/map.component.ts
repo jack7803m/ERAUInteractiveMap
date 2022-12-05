@@ -202,6 +202,8 @@ export class MapComponent implements OnInit {
             let startPix = this.pathFinderService.findNearestWalkablePixel(userLocationPixels);
             let endPix = this.pathFinderService.findNearestWalkablePixel(new LatLng(ev.location.lat, ev.location.lng));
             this.onFindPath(startPix, endPix);
+            // zoom out to show the whole path
+            this.map?.fitBounds(this.polyline?.getBounds() as L.LatLngBounds);
         }
         else
             this.toastr.error("Please enable location services to use this feature.", "Location Error");
