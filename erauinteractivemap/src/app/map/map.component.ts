@@ -122,7 +122,13 @@ export class MapComponent implements OnInit {
                 this.userLocation.setLatLng(loc);
                 this.userLocationRadius?.setLatLng(loc);
             } else {
-                this.userLocation = L.marker(loc).addTo(map);
+                this.userLocation = L.marker(loc, {
+                    icon: L.icon({
+                        iconUrl: 'assets/images/loco.png',
+                        iconSize: [32, 32],
+                        iconAnchor: [16, 16],
+                    }),
+                }).addTo(map);
                 this.userLocationRadius = L.circle(loc, {
                     radius: e.accuracy,
                 }).addTo(map);
@@ -174,6 +180,11 @@ export class MapComponent implements OnInit {
 
         this.polyline = L.polyline(pathLatLng, { color: 'cyan' }).addTo(this.map as L.Map);
         //this.map?.fitBounds(polyline.getBounds());
+    }
+
+    clickOnMap(e: L.LeafletMouseEvent) {
+        let latLng = e.latlng;
+        console.log(this.pathFinderService.findNearestWalkablePixel({ x: latLng.lng, y: latLng.lat } as IPoint));
     }
 
     die(ev: Building | BuildingChild) {
