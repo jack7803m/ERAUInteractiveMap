@@ -11,7 +11,7 @@ export class PathFinderService {
 
     //2d pixel array
     pixelArray: any[][] = [];
-    arrayOfNonTransparentPixels: IPoint[] = [];
+    arrayOfNonTransparentPixels: LatLng[] = [];
     imgLoaded: Subject<any> = new Subject<any>();
     //pathLoaded: Subject<any> = new Subject<any>();
     private aStarInstance?: AStarFinder;
@@ -48,7 +48,8 @@ export class PathFinderService {
                         let a = data[index + 3];
                         if (a > 0) {
                             row.push(0);
-                            this.arrayOfNonTransparentPixels.push(new Point(j, i) as IPoint);
+                            // latlng 
+                            this.arrayOfNonTransparentPixels.push(new LatLng(height - i, j));
                         } else {
                             row.push(1);
                         }
@@ -77,7 +78,7 @@ export class PathFinderService {
         //this.pathLoaded.next(path);
     }
 
-    findNearestWalkablePixel(point: IPoint): IPoint {
+    findNearestWalkablePixel(point: LatLng): LatLng {
         let nearestPoint = this.arrayOfNonTransparentPixels[0];
         let shortestDistance = this.distanceBetweenPoints(point, nearestPoint);
         for (let i = 1; i < this.arrayOfNonTransparentPixels.length; i++) {
@@ -90,9 +91,9 @@ export class PathFinderService {
         return nearestPoint;
     }
 
-    private distanceBetweenPoints(point1: IPoint, point2: IPoint): number {
-        let x = point1.x - point2.x;
-        let y = point1.y - point2.y;
+    private distanceBetweenPoints(point1: LatLng, point2: LatLng): number {
+        let x = point1.lat - point2.lat;
+        let y = point1.lng - point2.lng;
         return Math.sqrt(x * x + y * y);
     }
 

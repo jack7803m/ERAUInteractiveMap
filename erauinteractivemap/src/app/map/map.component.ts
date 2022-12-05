@@ -124,9 +124,9 @@ export class MapComponent implements OnInit {
             } else {
                 this.userLocation = L.marker(loc, {
                     icon: L.icon({
-                        iconUrl: 'assets/images/loco.png',
-                        iconSize: [32, 32],
-                        iconAnchor: [16, 16],
+                        iconUrl: 'assets/pins/loco.png',
+                        iconSize: [20, 20],
+                        iconAnchor: [10, 10],
                     }),
                 }).addTo(map);
                 this.userLocationRadius = L.circle(loc, {
@@ -183,16 +183,25 @@ export class MapComponent implements OnInit {
     }
 
     clickOnMap(e: L.LeafletMouseEvent) {
-        let latLng = e.latlng;
-        console.log(this.pathFinderService.findNearestWalkablePixel({ x: latLng.lng, y: latLng.lat } as IPoint));
+        // let latLng = e.latlng;
+        // let found = this.pathFinderService.findNearestWalkablePixel(e.latlng);
+        // console.log(found);
+        // // add to map
+        // let marker = L.marker(found, {
+        //     icon: L.icon({
+        //         iconUrl: 'assets/pins/loco.png',
+        //         iconSize: [32, 32],
+        //         iconAnchor: [16, 16],
+        //     }),
+        // }).addTo(this.map as L.Map);
     }
 
     die(ev: Building | BuildingChild) {
         if (this.userLocation) {
             let userLocationPixels = this.userLocation.getLatLng();
-            let startPix = this.pathFinderService.findNearestWalkablePixel(new L.Point(userLocationPixels.lng, userLocationPixels.lat));
-            let endPix = this.pathFinderService.findNearestWalkablePixel(new L.Point(ev.location.lng, ev.location.lat));
-            this.onFindPath({ lat: startPix.y, lng: startPix.x } as LatLng, { lat: endPix.y, lng: endPix.x } as LatLng);
+            let startPix = this.pathFinderService.findNearestWalkablePixel(userLocationPixels);
+            let endPix = this.pathFinderService.findNearestWalkablePixel(new LatLng(ev.location.lat, ev.location.lng));
+            this.onFindPath(startPix, endPix);
         }
         else
             this.toastr.error("Please enable location services to use this feature.", "Location Error");
